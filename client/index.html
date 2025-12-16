@@ -3,92 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ATOM Challenges</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ATOM Challenges - Connexion</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-<div class="container">
-    <h1>ATOM Challenges</h1>
+<body class="auth-page">
+    <div class="container">
+        <div class="auth-container">
+            <div class="logo">
+                <h1>⚛️ ATOM Challenges</h1>
+                <p class="tagline">Organisez et participez à des défis gaming</p>
+            </div>
 
-    <div id="auth">
-        <h2>Connexion / Inscription</h2>
-        <input type="text" id="username" placeholder="Nom d’utilisateur">
-        <input type="password" id="password" placeholder="Mot de passe">
-        <button onclick="register()">S’inscrire</button>
-        <button onclick="login()">Se connecter</button>
+            <div class="auth-box">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">Connexion</button>
+                    <button class="tab-btn" data-tab="register">Inscription</button>
+                </div>
+
+                <form id="loginForm" class="auth-form active">
+                    <h2>Se connecter</h2>
+                    <div class="form-group">
+                        <label for="loginUsername">Nom d'utilisateur</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Mot de passe</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Se connecter</button>
+                </form>
+
+                <form id="registerForm" class="auth-form">
+                    <h2>Créer un compte</h2>
+                    <div class="form-group">
+                        <label for="registerUsername">Nom d'utilisateur</label>
+                        <input type="text" id="registerUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Mot de passe</label>
+                        <input type="password" id="registerPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPasswordConfirm">Confirmer le mot de passe</label>
+                        <input type="password" id="registerPasswordConfirm" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">S'inscrire</button>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <div id="app" style="display:none;">
-        <!-- Création de défi -->
-        <section class="create-challenge">
-            <h2>Créer un défi</h2>
-            <form id="challengeForm">
-                <input type="text" id="challengeName" placeholder="Nom du défi" required>
-                <input type="text" id="gameName" placeholder="Nom du jeu" required>
-                <select id="typeChallenge" required>
-                    <option value="">Type de jeu</option>
-                    <option value="solo">Solo</option>
-                    <option value="multijoueur">Multijoueur</option>
-                </select>
-                <select id="formatChallenge" required>
-                    <option value="">Format de défi</option>
-                    <option value="tournoi">Tournoi</option>
-                    <option value="course">Course</option>
-                    <option value="marathon">Marathon</option>
-                    <option value="bingo">Bingo</option>
-                </select>
-                <input type="text" id="rulesChallenge" placeholder="Règles / Mods">
-                <label>Mise de points</label>
-                <input type="number" id="minPoints" placeholder="Min" min="0" value="0">
-                <input type="number" id="maxPoints" placeholder="Max" min="0" value="100">
-                <label>Visibilité</label>
-                <select id="visibility">
-                    <option value="public">Tout le monde</option>
-                    <option value="friends">Amis seulement</option>
-                    <option value="password">Protégé par mot de passe</option>
-                </select>
-                <input type="text" id="challengePassword" placeholder="Mot de passe si nécessaire">
-                <button type="submit">Créer le défi</button>
-            </form>
-        </section>
-
-        <!-- Liste des défis -->
-        <section class="challenge-list">
-            <h2>Liste des défis</h2>
-            <ul id="challengeList"></ul>
-        </section>
-
-        <!-- Classement -->
-        <section class="leaderboard">
-            <h2>Classement des joueurs</h2>
-            <ul id="leaderboard"></ul>
-        </section>
-
-        <!-- Chat -->
-        <section class="chat">
-            <h2>Chat du défi</h2>
-            <select id="chatChallengeSelect"></select>
-            <div id="chatWindow"></div>
-            <input type="text" id="chatInput" placeholder="Écrire un message...">
-            <button onclick="sendMessage()">Envoyer</button>
-        </section>
-    </div>
-</div>
-
-<!-- Modal participant -->
-<div id="participantModal" class="modal hidden">
-    <div class="modal-content">
-        <span class="close-button" onclick="closeModal()">&times;</span>
-        <h3>Modifier participant</h3>
-        <p id="participantName"></p>
-        <label>Points bonus/malus :</label>
-        <input type="number" id="scoreModifier" placeholder="Ex: +10 ou -5">
-        <label>Multiplicateur :</label>
-        <input type="number" id="scoreMultiplier" placeholder="Ex: 1.5">
-        <button onclick="applyModifier()">Appliquer</button>
-    </div>
-</div>
-
-<script src="script.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

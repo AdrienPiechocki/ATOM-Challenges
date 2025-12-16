@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATOM Challenges - Équipes</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>⚛️ ATOM Challenges</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Tableau de bord</a>
+                <a href="challenges.html" class="nav-link">Défis</a>
+                <a href="create-challenge.html" class="nav-link">Créer un défi</a>
+                <a href="teams.html" class="nav-link active">Équipes</a>
+                <a href="friends.html" class="nav-link">Amis</a>
+                <a href="leaderboard.html" class="nav-link">Classement</a>
+            </div>
+            <div class="nav-user">
+                <span class="user-points" id="userPoints">💰 0 pts</span>
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>🎮 Équipes</h2>
+            <button class="btn btn-primary" onclick="openCreateTeamModal()">+ Créer une équipe</button>
+        </div>
+
+        <div class="teams-container">
+            <section class="section">
+                <h3>Mes équipes</h3>
+                <div id="myTeamsList" class="teams-grid">
+                    <p class="empty-state">Vous n'êtes dans aucune équipe</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h3>Toutes les équipes</h3>
+                <div id="allTeamsList" class="teams-grid">
+                    <p class="empty-state">Aucune équipe disponible</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal création d'équipe -->
+    <div id="createTeamModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeCreateTeamModal()">&times;</span>
+            <h3>Créer une équipe</h3>
+            <form id="createTeamForm">
+                <div class="form-group">
+                    <label for="teamName">Nom de l'équipe *</label>
+                    <input type="text" id="teamName" required placeholder="Ex: Les Speedrunners">
+                </div>
+                <div class="form-group">
+                    <label for="teamTag">Tag (3-5 caractères) *</label>
+                    <input type="text" id="teamTag" required placeholder="Ex: SPD" maxlength="5" minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="teamMaxMembers">Nombre maximum de membres</label>
+                    <input type="number" id="teamMaxMembers" min="2" max="10" value="5">
+                </div>
+                <button type="submit" class="btn btn-primary">Créer l'équipe</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal détails équipe -->
+    <div id="teamDetailModal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <span class="close-button" onclick="closeTeamDetailModal()">&times;</span>
+            <div id="teamDetailContent"></div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/teams.js"></script>
+</body>
+</html>

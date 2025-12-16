@@ -1,79 +1,74 @@
 {
   "users": [
     {
-      "id": "_9gzk67z6z",
+      "id": "_d8zdzsyy3",
       "username": "Azimiro",
-      "passwordHash": "$2a$10$8n8txlIswi33MAKIYf2W8udLiypW.DYg77GDPDAZARNulwvqD2pD2",
-      "totalPoints": 100,
-      "friends": [],
+      "passwordHash": "$2a$10$qnVKHl80mciGYN8q94Ny/uLYp5yc8BLpJnovuwqHzMKRVRrr7JpDi",
+      "totalPoints": 90,
+      "friends": [
+        "Khbgbgk"
+      ],
       "cosmetics": [],
-      "cheated": false
+      "cheated": false,
+      "sentRequests": []
     },
     {
-      "id": "_e7pshn5g7",
+      "id": "_i89z5jry2",
       "username": "Khbgbgk",
-      "passwordHash": "$2a$10$FyPb90Prp/Y0HxR5SY41rOtpb70.zmfGk2GNn2lkxj23GUJ.UkKU2",
+      "passwordHash": "$2a$10$IQpVkdq64Xq3i3iMc.kQMOuOnxSSKHHwTarhLddCuhzT9a5eTegMG",
       "totalPoints": 100,
-      "friends": [],
+      "friends": [
+        "Azimiro"
+      ],
       "cosmetics": [],
-      "cheated": false
+      "cheated": false,
+      "friendRequests": []
     }
   ],
   "challenges": [
     {
-      "id": "_7art00mu4",
-      "name": "Requiem",
-      "game": "Skyrim",
-      "type": "solo",
-      "format": "marathon",
-      "rules": "",
-      "minPoints": 0,
-      "maxPoints": 100,
-      "visibility": "password",
-      "password": "test",
-      "participants": [
-        "Azimiro",
-        "Khbgbgk"
-      ]
-    },
-    {
-      "id": "_xz46ekmcz",
+      "id": "_yeffh4ols",
       "name": "Tournoi Master-Duel",
       "game": "Yu-Gi-Oh: Master-Duel",
       "type": "multijoueur",
       "format": "tournoi",
       "rules": "",
-      "minPoints": 0,
-      "maxPoints": 100,
+      "minBet": 0,
+      "maxBet": 100,
       "visibility": "friends",
-      "password": "",
+      "password": null,
+      "organizer": "Khbgbgk",
       "participants": [
-        "Azimiro",
-        "Khbgbgk"
-      ]
+        {
+          "username": "Khbgbgk",
+          "bet": 0,
+          "score": 0,
+          "modifier": 0,
+          "multiplier": 1
+        },
+        {
+          "username": "Azimiro",
+          "bet": 10,
+          "score": 0,
+          "modifier": 0,
+          "multiplier": 1
+        }
+      ],
+      "status": "active",
+      "createdAt": 1765923558052
     }
   ],
   "messages": {
-    "_7art00mu4": [
-      {
-        "player": "Azimiro",
-        "text": "yolo",
-        "timestamp": 1765919935059
-      },
+    "_yeffh4ols": [
       {
         "player": "Khbgbgk",
         "text": "yolo",
-        "timestamp": 1765920002850
+        "timestamp": 1765923582713
       },
       {
         "player": "Azimiro",
-        "text": "lol",
-        "timestamp": 1765920008378
-      },
-      {
-        "player": "Azimiro",
-        "text": "parfait",
-        "timestamp": 1765920017371
+        "text": "ouais",
+        "timestamp": 1765923728860
       }
     ]
   }

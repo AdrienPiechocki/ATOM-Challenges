@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATOM Challenges - Amis</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>⚛️ ATOM Challenges</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Tableau de bord</a>
+                <a href="challenges.html" class="nav-link">Défis</a>
+                <a href="create-challenge.html" class="nav-link">Créer un défi</a>
+                <a href="teams.html" class="nav-link">Équipes</a>
+                <a href="friends.html" class="nav-link active">Amis</a>
+                <a href="leaderboard.html" class="nav-link">Classement</a>
+            </div>
+            <div class="nav-user">
+                <span class="user-points" id="userPoints">💰 0 pts</span>
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>👥 Mes amis</h2>
+        </div>
+
+        <div class="friends-container">
+            <section class="section">
+                <h3>Rechercher un joueur</h3>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Rechercher par pseudo..." class="search-input">
+                    <button class="btn btn-primary" onclick="searchUsers()">🔍 Rechercher</button>
+                </div>
+                <div id="searchResults" class="search-results"></div>
+            </section>
+
+            <section class="section">
+                <h3>Demandes d'amis en attente (<span id="pendingCount">0</span>)</h3>
+                <div id="pendingRequests" class="friends-list">
+                    <p class="empty-state">Aucune demande en attente</p>
+                </div>
+            </section>
+
+            <section class="section">
+                <h3>Mes amis (<span id="friendsCount">0</span>)</h3>
+                <div id="friendsList" class="friends-list">
+                    <p class="empty-state">Aucun ami pour le moment</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/friends.js"></script>
+</body>
+</html>

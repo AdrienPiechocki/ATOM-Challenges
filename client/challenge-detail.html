@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATOM Challenges - Détails du défi</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>⚛️ ATOM Challenges</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Tableau de bord</a>
+                <a href="challenges.html" class="nav-link">Défis</a>
+                <a href="create-challenge.html" class="nav-link">Créer un défi</a>
+                <a href="leaderboard.html" class="nav-link">Classement</a>
+            </div>
+            <div class="nav-user">
+                <span class="user-points" id="userPoints">💰 0 pts</span>
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="challenge-detail">
+            <div class="detail-header">
+                <button class="btn btn-secondary btn-sm" onclick="window.location.href='challenges.html'">← Retour</button>
+                <h2 id="challengeTitle">Chargement...</h2>
+                <div class="detail-badges" id="challengeBadges"></div>
+            </div>
+
+            <div class="detail-content">
+                <div class="detail-main">
+                    <section class="detail-section">
+                        <h3>Informations</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Jeu</span>
+                                <span class="info-value" id="gameInfo">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Type</span>
+                                <span class="info-value" id="typeInfo">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Format</span>
+                                <span class="info-value" id="formatInfo">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Mise</span>
+                                <span class="info-value" id="betInfo">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Organisateur</span>
+                                <span class="info-value" id="organizerInfo">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Statut</span>
+                                <span class="info-value" id="statusInfo">-</span>
+                            </div>
+                        </div>
+                        <div class="rules-section" id="rulesSection"></div>
+                    </section>
+
+                    <section class="detail-section">
+                        <h3>Participants (<span id="participantCount">0</span>)</h3>
+                        <div id="participantsList" class="participants-grid"></div>
+                    </section>
+
+                    <section class="detail-section">
+                        <h3>Chat du défi</h3>
+                        <div class="chat-container">
+                            <div id="chatMessages" class="chat-messages"></div>
+                            <div class="chat-input-container">
+                                <input type="text" id="chatInput" placeholder="Écrire un message..." disabled>
+                                <button class="btn btn-primary" onclick="sendMessage()" disabled id="sendBtn">Envoyer</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="detail-sidebar">
+                    <div class="actions-card" id="actionsCard">
+                        <h3>Actions</h3>
+                        <div id="challengeActions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal modificateurs -->
+    <div id="modifierModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModifierModal()">&times;</span>
+            <h3>Modifier participant</h3>
+            <p id="modifierParticipantName"></p>
+            <div class="form-group">
+                <label for="scoreModifier">Points bonus/malus</label>
+                <input type="number" id="scoreModifier" placeholder="Ex: +10 ou -5">
+                <p class="help-text">Ajoutez ou retirez des points au score final</p>
+            </div>
+            <div class="form-group">
+                <label for="scoreMultiplier">Multiplicateur de score</label>
+                <input type="number" id="scoreMultiplier" step="0.1" placeholder="Ex: 1.5">
+                <p class="help-text">Multipliez le score final (1 = normal, 1.5 = +50%, 0.5 = -50%)</p>
+            </div>
+            <button class="btn btn-primary" onclick="applyModifier()">Appliquer</button>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/challenge-detail.js"></script>
+</body>
+</html>

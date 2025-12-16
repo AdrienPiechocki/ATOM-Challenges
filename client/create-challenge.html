@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATOM Challenges - Créer un défi</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>⚛️ ATOM Challenges</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="dashboard.html" class="nav-link">Tableau de bord</a>
+                <a href="challenges.html" class="nav-link">Défis</a>
+                <a href="create-challenge.html" class="nav-link active">Créer un défi</a>
+                <a href="teams.html" class="nav-link">Équipes</a>
+                <a href="friends.html" class="nav-link">Amis</a>
+                <a href="leaderboard.html" class="nav-link">Classement</a>
+            </div>
+            <div class="nav-user">
+                <span class="user-points" id="userPoints">💰 0 pts</span>
+                <span class="user-name" id="userName">Utilisateur</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>Créer un nouveau défi</h2>
+        </div>
+
+        <div class="create-form-container">
+            <form id="createChallengeForm" class="create-form">
+                <div class="form-section">
+                    <h3>Informations générales</h3>
+                    <div class="form-group">
+                        <label for="challengeName">Nom du défi *</label>
+                        <input type="text" id="challengeName" required placeholder="Ex: Speedrun Mario 64">
+                    </div>
+                    <div class="form-group">
+                        <label for="gameName">Nom du jeu *</label>
+                        <input type="text" id="gameName" required placeholder="Ex: Super Mario 64">
+                    </div>
+                    <div class="form-group">
+                        <label for="rulesChallenge">Règles / Mods</label>
+                        <textarea id="rulesChallenge" rows="4" placeholder="Décrivez les règles spécifiques, mods autorisés, etc."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Format du défi</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="teamFormat">Format des équipes *</label>
+                            <select id="teamFormat" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="solo">Solo</option>
+                                <option value="duo">Duo (2 joueurs)</option>
+                                <option value="squad">Squad (3-5 joueurs)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="formatChallenge">Type de défi *</label>
+                            <select id="formatChallenge" required>
+                                <option value="">Sélectionner...</option>
+                                <option value="tournoi">Tournoi</option>
+                                <option value="course">Course</option>
+                                <option value="marathon">Marathon</option>
+                                <option value="bingo">Bingo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="format-description" id="formatDescription"></div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Mise de points</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="minPoints">Mise minimum *</label>
+                            <input type="number" id="minPoints" min="0" value="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="maxPoints">Mise maximum *</label>
+                            <input type="number" id="maxPoints" min="0" value="100" required>
+                        </div>
+                    </div>
+                    <p class="help-text">Les participants devront miser entre ces deux valeurs pour rejoindre le défi</p>
+                </div>
+
+                <div class="form-section">
+                    <h3>Visibilité et accès</h3>
+                    <div class="form-group">
+                        <label for="visibility">Visibilité *</label>
+                        <select id="visibility" required>
+                            <option value="public">Tout le monde (Public)</option>
+                            <option value="friends">Amis seulement (Privé)</option>
+                            <option value="password">Protégé par mot de passe (Public)</option>
+                        </select>
+                    </div>
+                    <div class="form-group hidden" id="passwordGroup">
+                        <label for="challengePassword">Mot de passe du défi</label>
+                        <input type="text" id="challengePassword" placeholder="Mot de passe pour rejoindre">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='challenges.html'">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer le défi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/create-challenge.js"></script>
+</body>
+</html>

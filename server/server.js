@@ -19,7 +19,13 @@ wss.on('connection', ws => {
     console.log('Client connecté');
 
     // Envoyer état initial
-    ws.send(JSON.stringify({ type: 'init', challenges: data.challenges, messages: data.messages, users: data.users }));
+    ws.send(JSON.stringify({ 
+        type: 'init', 
+        challenges: data.challenges, 
+        messages: data.messages, 
+        users: data.users,
+        teams: data.teams || []
+    }));
 
     ws.on('message', message => {
         const msg = JSON.parse(message);
@@ -33,6 +39,11 @@ wss.on('connection', ws => {
                 data.users = msg.users;
                 saveData();
                 broadcast({ type: 'updateUsers', users: data.users });
+                break;
+            case 'updateTeams':
+                data.teams = msg.teams;
+                saveData();
+                broadcast({ type: 'updateTeams', teams: data.teams });
                 break;
             case 'newMessage':
                 if(!data.messages[msg.challengeId]) data.messages[msg.challengeId] = [];

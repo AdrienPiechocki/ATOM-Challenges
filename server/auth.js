@@ -1,64 +1,75 @@
 const express = require('express');
-const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
 
-const SECRET_KEY = "ATOM_SECRET_KEY";
-const DATA_PATH = path.join(__dirname, 'data.json');
+const router = express.Router();
+const SECRET_KEY = 'atom_challenges_secret_2025';
+const DATA_FILE = path.join(__dirname, 'data.json');
 
 // Charger les données
-let data = fs.readJsonSync(DATA_PATH);
-
-// Enregistrer les données
-function saveData() {
-    fs.writeJsonSync(DATA_PATH, data, { spaces: 2 });
+let data = { users: [], challenges: [], messages: {}, teams: [] };
+if(fs.existsSync(DATA_FILE)) {
+    data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    // Initialiser teams si absent
+    if(!data.teams) data.teams = [];
+    // Initialiser les champs amis si absents
+    data.users.forEach(user => {
+        if(!user.friends) user.friends = [];
+        if(!user.friendRequests) user.friendRequests = [];
+        if(!user.sentRequests) user.sentRequests = [];
+    });
 }
 
-// Enregistrement
+function saveData() {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+// Inscription
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
-    if(data.users.find(u => u.username === username)) return res.status(400).json({ error: "Utilisateur déjà existant" });
-
-    const hash = await bcrypt.hash(password, 10);
-    const newUser = { 
-        id: "_" + Math.random().toString(36).substr(2, 9), 
-        username, 
-        passwordHash: hash, 
-        totalPoints: 100, 
-        friends: [], 
-        cosmetics: [], 
-        cheated: false 
+    
+    if(data.users.find(u => u.username === username)) {
+        return res.status(400).json({ error: 'Ce nom d\'utilisateur existe déjà' });
+    }
+    
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = {
+        id: '_' + Math.random().toString(36).substr(2, 9),
+        username,
+        passwordHash,
+        totalPoints: 100,
+        friends: [],
+        friendRequests: [],
+        sentRequests: [],
+        cosmetics: [],
+        cheated: false
     };
+    
     data.users.push(newUser);
     saveData();
-    res.json({ success: true });
+    
+    res.json({ message: 'Inscription réussie' });
 });
 
 // Connexion
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
+    
     const user = data.users.find(u => u.username === username);
-    if(!user) return res.status(400).json({ error: "Utilisateur inconnu" });
-
-    const match = await bcrypt.compare(password, user.passwordHash);
-    if(!match) return res.status(400).json({ error: "Mot de passe incorrect" });
-
-    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '2h' });
-    res.json({ token, username: user.username });
+    if(!user) {
+        return res.status(400).json({ error: 'Utilisateur introuvable' });
+    }
+    
+    const validPassword = await bcrypt.compare(password, user.passwordHash);
+    if(!validPassword) {
+        return res.status(400).json({ error: 'Mot de passe incorrect' });
+    }
+    
+    const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '7d' });
+    
+    res.json({ token, username });
 });
 
-// Middleware JWT
-function authenticateToken(req, res, next){
-    const token = req.headers['authorization'];
-    if(!token) return res.sendStatus(401);
-
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if(err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-}
-
-module.exports = { router, authenticateToken, data, saveData };
+module.exports = { router, data, saveData };
