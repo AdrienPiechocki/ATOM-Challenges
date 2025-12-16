@@ -1,0 +1,80 @@
+{
+  "users": [
+    {
+      "id": "_9gzk67z6z",
+      "username": "Azimiro",
+      "passwordHash": "$2a$10$8n8txlIswi33MAKIYf2W8udLiypW.DYg77GDPDAZARNulwvqD2pD2",
+      "totalPoints": 100,
+      "friends": [],
+      "cosmetics": [],
+      "cheated": false
+    },
+    {
+      "id": "_e7pshn5g7",
+      "username": "Khbgbgk",
+      "passwordHash": "$2a$10$FyPb90Prp/Y0HxR5SY41rOtpb70.zmfGk2GNn2lkxj23GUJ.UkKU2",
+      "totalPoints": 100,
+      "friends": [],
+      "cosmetics": [],
+      "cheated": false
+    }
+  ],
+  "challenges": [
+    {
+      "id": "_7art00mu4",
+      "name": "Requiem",
+      "game": "Skyrim",
+      "type": "solo",
+      "format": "marathon",
+      "rules": "",
+      "minPoints": 0,
+      "maxPoints": 100,
+      "visibility": "password",
+      "password": "test",
+      "participants": [
+        "Azimiro",
+        "Khbgbgk"
+      ]
+    },
+    {
+      "id": "_xz46ekmcz",
+      "name": "Tournoi Master-Duel",
+      "game": "Yu-Gi-Oh: Master-Duel",
+      "type": "multijoueur",
+      "format": "tournoi",
+      "rules": "",
+      "minPoints": 0,
+      "maxPoints": 100,
+      "visibility": "friends",
+      "password": "",
+      "participants": [
+        "Azimiro",
+        "Khbgbgk"
+      ]
+    }
+  ],
+  "messages": {
+    "_7art00mu4": [
+      {
+        "player": "Azimiro",
+        "text": "yolo",
+        "timestamp": 1765919935059
+      },
+      {
+        "player": "Khbgbgk",
+        "text": "yolo",
+        "timestamp": 1765920002850
+      },
+      {
+        "player": "Azimiro",
+        "text": "lol",
+        "timestamp": 1765920008378
+      },
+      {
+        "player": "Azimiro",
+        "text": "parfait",
+        "timestamp": 1765920017371
+      }
+    ]
+  }
+}

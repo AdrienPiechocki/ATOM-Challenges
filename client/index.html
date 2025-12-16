@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATOM Challenges</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>ATOM Challenges</h1>
+
+    <div id="auth">
+        <h2>Connexion / Inscription</h2>
+        <input type="text" id="username" placeholder="Nom d’utilisateur">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="register()">S’inscrire</button>
+        <button onclick="login()">Se connecter</button>
+    </div>
+
+    <div id="app" style="display:none;">
+        <!-- Création de défi -->
+        <section class="create-challenge">
+            <h2>Créer un défi</h2>
+            <form id="challengeForm">
+                <input type="text" id="challengeName" placeholder="Nom du défi" required>
+                <input type="text" id="gameName" placeholder="Nom du jeu" required>
+                <select id="typeChallenge" required>
+                    <option value="">Type de jeu</option>
+                    <option value="solo">Solo</option>
+                    <option value="multijoueur">Multijoueur</option>
+                </select>
+                <select id="formatChallenge" required>
+                    <option value="">Format de défi</option>
+                    <option value="tournoi">Tournoi</option>
+                    <option value="course">Course</option>
+                    <option value="marathon">Marathon</option>
+                    <option value="bingo">Bingo</option>
+                </select>
+                <input type="text" id="rulesChallenge" placeholder="Règles / Mods">
+                <label>Mise de points</label>
+                <input type="number" id="minPoints" placeholder="Min" min="0" value="0">
+                <input type="number" id="maxPoints" placeholder="Max" min="0" value="100">
+                <label>Visibilité</label>
+                <select id="visibility">
+                    <option value="public">Tout le monde</option>
+                    <option value="friends">Amis seulement</option>
+                    <option value="password">Protégé par mot de passe</option>
+                </select>
+                <input type="text" id="challengePassword" placeholder="Mot de passe si nécessaire">
+                <button type="submit">Créer le défi</button>
+            </form>
+        </section>
+
+        <!-- Liste des défis -->
+        <section class="challenge-list">
+            <h2>Liste des défis</h2>
+            <ul id="challengeList"></ul>
+        </section>
+
+        <!-- Classement -->
+        <section class="leaderboard">
+            <h2>Classement des joueurs</h2>
+            <ul id="leaderboard"></ul>
+        </section>
+
+        <!-- Chat -->
+        <section class="chat">
+            <h2>Chat du défi</h2>
+            <select id="chatChallengeSelect"></select>
+            <div id="chatWindow"></div>
+            <input type="text" id="chatInput" placeholder="Écrire un message...">
+            <button onclick="sendMessage()">Envoyer</button>
+        </section>
+    </div>
+</div>
+
+<!-- Modal participant -->
+<div id="participantModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h3>Modifier participant</h3>
+        <p id="participantName"></p>
+        <label>Points bonus/malus :</label>
+        <input type="number" id="scoreModifier" placeholder="Ex: +10 ou -5">
+        <label>Multiplicateur :</label>
+        <input type="number" id="scoreMultiplier" placeholder="Ex: 1.5">
+        <button onclick="applyModifier()">Appliquer</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
