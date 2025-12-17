@@ -1,6 +1,14 @@
 let teams = [];
 
-function handleWebSocketMessage(data) {
+
+
+const originalHandleMessage = window.handleWebSocketMessage;
+window.handleWebSocketMessage = function(data) {
+    originalHandleMessage(data);
+    _handleWebSocketMessage(data);
+};
+
+function _handleWebSocketMessage(data) {
     if(data.type === 'init') {
         teams = data.teams || [];
     } else if(data.type === 'updateTeams') {
@@ -11,12 +19,6 @@ function handleWebSocketMessage(data) {
         updatePageData();
     }
 }
-
-const originalHandleMessage = window.handleWebSocketMessage;
-window.handleWebSocketMessage = function(data) {
-    originalHandleMessage(data);
-    handleWebSocketMessage(data);
-};
 
 function updatePageData() {
     renderTeams();
