@@ -92,21 +92,6 @@
                     </div>
                 </div>
 
-                <!-- Configuration Course -->
-                <div class="form-section hidden" id="courseConfig">
-                    <h3>🏁 Configuration Course</h3>
-                    <div class="form-group">
-                        <label for="baseScore">Score de base (1er place) *</label>
-                        <input type="number" id="baseScore" min="1" value="100" placeholder="100">
-                        <p class="help-text">Le score diminue pour chaque position suivante</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="scoreDecrement">Décrémentation par position *</label>
-                        <input type="number" id="scoreDecrement" min="1" value="10" placeholder="10">
-                        <p class="help-text">Points en moins pour chaque position (1er: 100, 2e: 90, 3e: 80...)</p>
-                    </div>
-                </div>
-
                 <!-- Configuration Marathon -->
                 <div class="form-section hidden" id="marathonConfig">
                     <h3>🎯 Configuration Marathon</h3>
@@ -121,11 +106,20 @@
                 <div class="form-section hidden" id="bingoConfig">
                     <h3>🎲 Configuration Bingo</h3>
                     <div class="form-group">
-                        <label>Grille 5x5 d'objectifs</label>
-                        <p class="help-text">Définissez 25 objectifs pour la grille de bingo</p>
-                        <div id="bingoGrid"></div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="generateBingoGrid()">Générer la grille</button>
+                        <label for="bingoSize">Taille de la grille</label>
+                        <select id="bingoSize">
+                            <option value="3" selected>3 x 3 (9 cases)</option>
+                            <option value="4">4 x 4 (16 cases)</option>
+                            <option value="5">5 x 5 (25 cases)</option>
+                            <option value="6">6 x 6 (36 cases)</option>
+                        </select>
                     </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="generateBingoGrid()">
+                        Générer la grille
+                    </button>
+
+                    <div id="bingoGrid"></div>
                 </div>
 
                 <div class="form-section">
@@ -150,8 +144,6 @@
                         <select id="visibility" required>
                             <option value="public">Tout le monde</option>
                             <option value="password">Protégé par mot de passe</option>
-                            <option value="friends">Amis seulement</option>
-                            <!--<option value="invite">Sur invitation</option> -->
                         </select>
                     </div>
                     <div class="form-group hidden" id="passwordGroup">
