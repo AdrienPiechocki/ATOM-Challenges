@@ -47,6 +47,11 @@ function renderTeamCard(team, isMember) {
     const isFull = team.members.length >= team.maxMembers;
     const isLeader = team.leader === currentUser;
     
+    // Vérifier si le chef de l'équipe est un ami
+    const currentUserData = users.find(u => u.username === currentUser);
+    const isFriend = currentUserData && currentUserData.friends && currentUserData.friends.includes(team.leader);
+    const canJoin = !isMember && !isFull && isFriend;
+    
     return `
         <div class="team-card" onclick="openTeamDetail('${team.id}')">
             <div class="team-header">
@@ -58,7 +63,8 @@ function renderTeamCard(team, isMember) {
                 👥 ${team.members.length}/${team.maxMembers} membres
             </div>
             <div class="team-actions" onclick="event.stopPropagation()">
-                ${!isMember && !isFull ? `<button class="btn btn-success btn-sm" onclick="joinTeam('${team.id}')">Rejoindre</button>` : ''}
+                ${canJoin ? `<button class="btn btn-success btn-sm" onclick="joinTeam('${team.id}')">Rejoindre</button>` : ''}
+                ${!isMember && !isFull && !isFriend ? `<span style="color: var(--gray); font-size: 0.875rem;">🔒 Ami requis</span>` : ''}
                 ${isMember && !isLeader ? `<button class="btn btn-danger btn-sm" onclick="leaveTeam('${team.id}')">Quitter</button>` : ''}
                 ${isLeader ? `<button class="btn btn-danger btn-sm" onclick="deleteTeam('${team.id}')">Supprimer</button>` : ''}
             </div>
@@ -116,6 +122,13 @@ function joinTeam(teamId) {
     
     if(team.members.includes(currentUser)) {
         showNotification('Vous êtes déjà dans cette équipe', 'error');
+        return;
+    }
+    
+    // Vérifier si le chef de l'équipe est un ami
+    const currentUserData = users.find(u => u.username === currentUser);
+    if(!currentUserData || !currentUserData.friends || !currentUserData.friends.includes(team.leader)) {
+        showNotification('Vous devez être ami avec le chef de l\'équipe pour la rejoindre', 'error');
         return;
     }
     

@@ -6,14 +6,35 @@ const formatDescriptions = {
     bingo: 'Les joueurs doivent compléter une grille de Bingo correspondant à divers objectifs en jeu. Chaque ligne/colonne/diagonale apporte du score.'
 };
 
-// Afficher la description du format
+let marathonObjectives = [];
+let bingoObjectives = [];
+
+// Afficher la description du format et la config associée
 document.getElementById('formatChallenge').addEventListener('change', (e) => {
     const format = e.target.value;
     const descEl = document.getElementById('formatDescription');
     
+    // Masquer toutes les configs
+    document.getElementById('tournoiConfig').classList.add('hidden');
+    document.getElementById('courseConfig').classList.add('hidden');
+    document.getElementById('marathonConfig').classList.add('hidden');
+    document.getElementById('bingoConfig').classList.add('hidden');
+    
     if(format && formatDescriptions[format]) {
         descEl.textContent = formatDescriptions[format];
         descEl.style.display = 'block';
+        
+        // Afficher la config correspondante
+        if(format === 'tournoi') {
+            document.getElementById('tournoiConfig').classList.remove('hidden');
+        } else if(format === 'course') {
+            document.getElementById('courseConfig').classList.remove('hidden');
+        } else if(format === 'marathon') {
+            document.getElementById('marathonConfig').classList.remove('hidden');
+            renderObjectivesList();
+        } else if(format === 'bingo') {
+            document.getElementById('bingoConfig').classList.remove('hidden');
+        }
     } else {
         descEl.style.display = 'none';
     }
@@ -28,6 +49,77 @@ document.getElementById('visibility').addEventListener('change', (e) => {
         passwordGroup.classList.add('hidden');
     }
 });
+
+// Gestion des objectifs Marathon
+function addObjective() {
+    marathonObjectives.push({
+        id: '_' + Math.random().toString(36).substr(2, 9),
+        name: '',
+        points: 10,
+        repeatable: false
+    });
+    renderObjectivesList();
+}
+
+function removeObjective(id) {
+    marathonObjectives = marathonObjectives.filter(o => o.id !== id);
+    renderObjectivesList();
+}
+
+function renderObjectivesList() {
+    const list = document.getElementById('objectivesList');
+    
+    if(marathonObjectives.length === 0) {
+        list.innerHTML = '<p style="color: var(--gray); font-style: italic;">Aucun objectif défini</p>';
+        return;
+    }
+    
+    list.innerHTML = marathonObjectives.map((obj, index) => `
+        <div class="objective-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+            <input type="text" placeholder="Nom de l'objectif" value="${obj.name}" 
+                   onchange="marathonObjectives[${index}].name = this.value" 
+                   style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+            <input type="number" placeholder="Points" value="${obj.points}" min="1"
+                   onchange="marathonObjectives[${index}].points = parseInt(this.value)" 
+                   style="width: 80px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+            <label style="display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;">
+                <input type="checkbox" ${obj.repeatable ? 'checked' : ''} 
+                       onchange="marathonObjectives[${index}].repeatable = this.checked">
+                Répétable
+            </label>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeObjective('${obj.id}')">✕</button>
+        </div>
+    `).join('');
+}
+
+// Gestion de la grille Bingo
+function generateBingoGrid() {
+    bingoObjectives = Array(25).fill(null).map((_, i) => ({
+        id: i,
+        name: '',
+        position: i
+    }));
+    renderBingoGrid();
+}
+
+function renderBingoGrid() {
+    const grid = document.getElementById('bingoGrid');
+    
+    if(bingoObjectives.length === 0) {
+        grid.innerHTML = '<p style="color: var(--gray); font-style: italic;">Cliquez sur "Générer la grille" pour créer 25 cases</p>';
+        return;
+    }
+    
+    grid.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 0.5rem;">
+            ${bingoObjectives.map((obj, index) => `
+                <input type="text" placeholder="Case ${index + 1}" value="${obj.name}"
+                       onchange="bingoObjectives[${index}].name = this.value"
+                       style="padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.85rem;">
+            `).join('')}
+        </div>
+    `;
+}
 
 // Création du défi
 document.getElementById('createChallengeForm').addEventListener('submit', (e) => {
@@ -74,6 +166,50 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         status: 'waiting',
         createdAt: Date.now()
     };
+    
+    // Ajouter la configuration spécifique selon le format
+    if(formatChallenge === 'tournoi') {
+        newChallenge.tournamentConfig = {
+            groupSize: parseInt(document.getElementById('groupSize').value),
+            qualifiedPerGroup: parseInt(document.getElementById('qualifiedPerGroup').value),
+            groups: [],
+            bracket: [],
+            currentPhase: 'waiting' // waiting, groups, bracket, finished
+        };
+    } else if(formatChallenge === 'course') {
+        newChallenge.raceConfig = {
+            baseScore: parseInt(document.getElementById('baseScore').value) || 100,
+            scoreDecrement: parseInt(document.getElementById('scoreDecrement').value) || 10,
+            finishTimes: {}, // username: timestamp
+            rankings: []
+        };
+    } else if(formatChallenge === 'marathon') {
+        if(marathonObjectives.length === 0) {
+            showNotification('Veuillez ajouter au moins un objectif pour le marathon', 'error');
+            return;
+        }
+        if(marathonObjectives.some(o => !o.name.trim())) {
+            showNotification('Tous les objectifs doivent avoir un nom', 'error');
+            return;
+        }
+        newChallenge.marathonConfig = {
+            objectives: marathonObjectives.map(o => ({...o})),
+            completions: {} // username: [objectiveId, objectiveId, ...]
+        };
+    } else if(formatChallenge === 'bingo') {
+        if(bingoObjectives.length !== 25) {
+            showNotification('Veuillez générer la grille de bingo (25 cases)', 'error');
+            return;
+        }
+        if(bingoObjectives.some(o => !o.name.trim())) {
+            showNotification('Toutes les cases du bingo doivent être remplies', 'error');
+            return;
+        }
+        newChallenge.bingoConfig = {
+            grid: bingoObjectives.map(o => ({...o})),
+            completions: {} // username: [position, position, ...]
+        };
+    }
     
     // Initialiser les progressions
     newChallenge.progressions[currentUser] = {
