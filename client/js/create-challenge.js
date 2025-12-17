@@ -7,6 +7,7 @@ const formatDescriptions = {
 };
 
 let marathonObjectives = [];
+let negativeObjectives = [];
 let bingoObjectives = [];
 let bingoSize = 3;
 
@@ -83,24 +84,84 @@ function renderObjectivesList() {
         list.innerHTML = '<p style="color: var(--gray); font-style: italic;">Aucun objectif défini</p>';
         return;
     }
-    
+
+    // Liste des points possibles
+    const pointsOptions = [5, 10, 15, 20, 25, 30];
+
     list.innerHTML = marathonObjectives.map((obj, index) => `
         <div class="objective-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
             <input type="text" placeholder="Nom de l'objectif" value="${obj.name}" 
                    onchange="marathonObjectives[${index}].name = this.value" 
                    style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
-            <input type="number" placeholder="Points" value="${obj.points}" min="1"
-                   onchange="marathonObjectives[${index}].points = parseInt(this.value)" 
-                   style="width: 80px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+            
+            <select onchange="marathonObjectives[${index}].points = parseInt(this.value)" 
+                    style="width: 80px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                ${pointsOptions.map(p => `
+                    <option value="${p}" ${obj.points === p ? 'selected' : ''}>${p}</option>
+                `).join('')}
+            </select>
+            
             <label style="display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;">
                 <input type="checkbox" ${obj.repeatable ? 'checked' : ''} 
                        onchange="marathonObjectives[${index}].repeatable = this.checked">
                 Répétable
             </label>
+
             <button type="button" class="btn btn-danger btn-sm" onclick="removeObjective('${obj.id}')">✕</button>
         </div>
     `).join('');
 }
+
+function addNegativeObjective() {
+    negativeObjectives.push({
+        id: '_' + Math.random().toString(36).substr(2, 9),
+        name: '',
+        points: -10, // points négatifs par défaut
+        repeatable: false
+    });
+    renderNegativeObjectivesList();
+}
+
+function removeNegativeObjective(id) {
+    negativeObjectives = negativeObjectives.filter(o => o.id !== id);
+    renderNegativeObjectivesList();
+}
+
+function renderNegativeObjectivesList() {
+    const list = document.getElementById('negativeObjectivesList');
+    
+    if(negativeObjectives.length === 0) {
+        list.innerHTML = '<p style="color: var(--gray); font-style: italic;">Aucun objectif à éviter défini</p>';
+        return;
+    }
+
+    const pointsOptions = [-5, -10, -15, -20];
+
+    list.innerHTML = negativeObjectives.map((obj, index) => `
+        <div class="objective-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+            <input type="text" placeholder="Nom de l'objectif" value="${obj.name}" 
+                   onchange="negativeObjectives[${index}].name = this.value" 
+                   style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+            
+            <select onchange="negativeObjectives[${index}].points = parseInt(this.value)" 
+                    style="width: 80px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                ${pointsOptions.map(p => `
+                    <option value="${p}" ${obj.points === p ? 'selected' : ''}>${p}</option>
+                `).join('')}
+            </select>
+            
+            <label style="display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;">
+                <input type="checkbox" ${obj.repeatable ? 'checked' : ''} 
+                       onchange="negativeObjectives[${index}].repeatable = this.checked">
+                Répétable
+            </label>
+
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeNegativeObjective('${obj.id}')">✕</button>
+        </div>
+    `).join('');
+}
+
+
 
 // --- Gestion de la grille Bingo ---
 function generateBingoGrid() {
@@ -243,6 +304,7 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         }
         newChallenge.marathonConfig = {
             objectives: marathonObjectives.map(o => ({...o})),
+            negatives: negativeObjectives.map(o => ({...o})),
             completions: {}
         };
     } else if(formatChallenge === 'bingo') {

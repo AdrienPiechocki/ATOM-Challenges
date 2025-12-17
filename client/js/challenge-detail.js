@@ -20,7 +20,6 @@ function updatePageData() {
 function renderChallengeDetail() {
     const challenge = challenges.find(c => c.id === currentChallengeId);
     if (!challenge) {
-        showNotification('Défi introuvable', 'error');
         setTimeout(() => window.location.href = 'challenges.html', 2000);
         return;
     }
@@ -477,14 +476,18 @@ function refundAllBets(challenge) {
         // 👤 Joueur solo
         if (p.type === 'player') {
             const user = users.find(u => u.username === p.username);
-            if (user) user.totalPoints += p.bet;
+            if (user && p.originalPoints !== undefined) {
+                user.totalPoints = p.originalPoints; // Restaurer
+            }
         }
 
         // 👥 Équipe
         if (p.type === 'team') {
             p.members.forEach(username => {
                 const user = users.find(u => u.username === username);
-                if (user) user.totalPoints += p.bet;
+                if (user && p.originalPoints?.[username] !== undefined) {
+                    user.totalPoints = p.originalPoints[username]; // Restaurer
+                }
             });
         }
     });
@@ -574,7 +577,7 @@ function confirmJoin() {
     const challenge = challenges.find(c => String(c.id) === String(selectedChallengeForJoin));
     if (!challenge) return;
 
-    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1 };
+    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1, originalPoints: 0 };
 
     if (challenge.teamFormat === "team") {
         const teamId = document.getElementById('teamSelect').value;
@@ -595,8 +598,13 @@ function confirmJoin() {
             bet: 0,
             modifier: 0,
             multiplier: 1,
-            isLeader: true // Marquer le leader
+            isLeader: true,
+            originalPoints: {} // Stocker points initiaux de chaque membre
         };
+    } else {
+        // Stocker le total initial du joueur
+        const user = users.find(u => u.username === currentUser);
+        if(user) participant.originalPoints = user.totalPoints;
     }
 
     const betAmount = parseInt(document.getElementById('betAmount').value);
@@ -610,18 +618,22 @@ function confirmJoin() {
         if (pass !== challenge.password) return showNotification('Mot de passe incorrect', 'error');
     }
 
-    challenge.participants.push(participant);
-
-    // Déduire les points du joueur ou de l'équipe
+    // Déduire les points du joueur ou de l'équipe et stocker les points initiaux
     if (participant.type === 'team') {
         participant.members.forEach(username => {
             const user = users.find(u => u.username === username);
-            if (user) user.totalPoints -= betAmount;
+            if (user) {
+                if(!participant.originalPoints) participant.originalPoints = {};
+                participant.originalPoints[username] = user.totalPoints; // sauvegarde
+                user.totalPoints -= betAmount;
+            }
         });
     } else {
         const user = users.find(u => u.username === currentUser);
         if (user) user.totalPoints -= betAmount;
     }
+
+    challenge.participants.push(participant);
 
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
     ws.send(JSON.stringify({ type: 'updateUsers', users }));
