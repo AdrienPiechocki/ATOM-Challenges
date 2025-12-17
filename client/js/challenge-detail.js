@@ -497,15 +497,13 @@ function refundAllBets(challenge) {
 function deleteChallenge() {
     if (!confirm('Supprimer ce défi ? Cette action est irréversible !')) return;
 
-    const refund = confirm('Souhaitez-vous rembourser les mises à tous les participants ?');
-
     const index = challenges.findIndex(c => c.id === currentChallengeId);
     if (index === -1) return;
 
     const challenge = challenges[index];
 
     // 🔄 Remboursement des mises
-    if (refund && challenge.participants && challenge.participants.length > 0) {
+    if (challenge.participants && challenge.participants.length > 0) {
         refundAllBets(challenge)
         ws.send(JSON.stringify({ type: 'updateUsers', users }));
     }
@@ -514,11 +512,7 @@ function deleteChallenge() {
     challenges.splice(index, 1);
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
 
-    showNotification(
-        refund
-            ? 'Défi supprimé et mises remboursées'
-            : 'Défi supprimé sans remboursement'
-    );
+    showNotification('Défi supprimé et mises remboursées');
 
     setTimeout(() => window.location.href = 'challenges.html', 800);
 }
