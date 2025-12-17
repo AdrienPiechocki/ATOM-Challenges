@@ -1694,3 +1694,19 @@ body {
         font-size: 0.7rem;
     }
 }
+
+.race-step-time {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.race-step-time input {
+    width: 60px;
+    padding: 0.3rem;
+    text-align: center;
+}
+
+.race-step-time span {
+    font-weight: bold;
+}

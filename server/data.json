@@ -1,6 +1,137 @@
 {
-  "users": [],
-  "challenges": [],
+  "users": [
+    {
+      "id": "_mfunro2ow",
+      "username": "Azimiro",
+      "passwordHash": "$2a$10$wrpS2QDana4OmGkS/AobUedelWPqoH6nrQVLEBTtrepa.PeV3n7JC",
+      "totalPoints": 100,
+      "friends": [],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    },
+    {
+      "id": "_tzvv8cwnu",
+      "username": "Khbgbgk",
+      "passwordHash": "$2a$10$v8zEHTFvd4.15Kbkn3SUyu9G4cScPxLwRC9Ai/te4j01CEsRr7aSu",
+      "totalPoints": 100,
+      "friends": [],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    }
+  ],
+  "challenges": [
+    {
+      "id": "_ouioa4030",
+      "name": "Speedrun Mario",
+      "game": "Mario",
+      "teamFormat": "solo",
+      "format": "course",
+      "rules": "",
+      "minBet": 0,
+      "maxBet": 100,
+      "visibility": "public",
+      "password": null,
+      "organizer": "Azimiro",
+      "participants": [
+        {
+          "username": "Azimiro",
+          "type": "player",
+          "bet": 0,
+          "modifier": 0,
+          "multiplier": 1,
+          "originalPoints": 100
+        },
+        {
+          "username": "Khbgbgk",
+          "type": "player",
+          "bet": 0,
+          "modifier": 0,
+          "multiplier": 1,
+          "originalPoints": 100
+        }
+      ],
+      "progressions": {
+        "Azimiro": {
+          "submissions": [],
+          "score": 1000,
+          "validated": 0,
+          "rejected": 0,
+          "cheated": false
+        },
+        "Khbgbgk": {
+          "submissions": [],
+          "score": 402,
+          "validated": 0,
+          "rejected": 0,
+          "cheated": false
+        }
+      },
+      "status": "finished",
+      "createdAt": 1766007262599,
+      "raceConfig": {
+        "steps": [
+          {
+            "id": "_ggtnswfyc",
+            "name": "Monde 1"
+          },
+          {
+            "id": "_9vq5759pf",
+            "name": "Monde 2"
+          },
+          {
+            "id": "_3t7rry31a",
+            "name": "Monde 3"
+          }
+        ],
+        "times": {
+          "Azimiro": {
+            "_ggtnswfyc": 432024,
+            "_9vq5759pf": 178001,
+            "_3t7rry31a": 182016
+          },
+          "Khbgbgk": {
+            "_ggtnswfyc": 317412,
+            "_9vq5759pf": 208059,
+            "_3t7rry31a": 272549
+          }
+        },
+        "rankings": []
+      },
+      "results": {
+        "winner": "Azimiro",
+        "totalPot": 0,
+        "rankings": [
+          {
+            "username": "Azimiro",
+            "type": "player",
+            "bet": 0,
+            "modifier": 0,
+            "multiplier": 1,
+            "originalPoints": 100,
+            "displayName": "Azimiro",
+            "score": 1000,
+            "cheated": false
+          },
+          {
+            "username": "Khbgbgk",
+            "type": "player",
+            "bet": 0,
+            "modifier": 0,
+            "multiplier": 1,
+            "originalPoints": 100,
+            "displayName": "Khbgbgk",
+            "score": 402,
+            "cheated": false
+          }
+        ],
+        "finishedAt": 1766009606727
+      }
+    }
+  ],
   "messages": {},
   "teams": []
 }

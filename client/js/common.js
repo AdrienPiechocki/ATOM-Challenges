@@ -137,7 +137,7 @@ function getStatusBadge(status) {
     const badges = {
         waiting: '<span class="badge status-waiting">⏳ En attente</span>',
         active: '<span class="badge status-active">🎮 En cours</span>',
-        completed: '<span class="badge status-completed">✅ Terminé</span>'
+        finished: '<span class="badge status-completed">✅ Terminé</span>'
     };
     return badges[status] || '';
 }

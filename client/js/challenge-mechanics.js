@@ -276,162 +276,245 @@ function setMatchWinner(round, matchIndex, winnerId) {
 // ========== COURSE ==========
 function renderRace() {
     const config = currentChallenge.raceConfig;
-    const currentUserData = users.find(u => u.username === currentUser);
     const userTeams = teams.filter(t => t.members.some(m => m.username === currentUser));
-    
+
     let isParticipant = false;
     let participantId = null;
-    
-    if(currentChallenge.teamFormat === 'team') {
-        const participantTeam = currentChallenge.participants.find(p => 
+
+    if (currentChallenge.teamFormat === 'team') {
+        const participantTeam = currentChallenge.participants.find(p =>
             p.type === 'team' && userTeams.some(t => t.id === p.teamId)
         );
-        if(participantTeam) {
+        if (participantTeam) {
             isParticipant = true;
             participantId = participantTeam.teamId;
         }
     } else {
-        isParticipant = currentChallenge.participants.some(p => p.type === 'player' && p.username === currentUser);
+        isParticipant = currentChallenge.participants.some(
+            p => p.type === 'player' && p.username === currentUser
+        );
         participantId = currentUser;
     }
-    
-    const hasFinished = config.finishTimes[participantId];
-    
-    const timerDiv = document.getElementById('raceTimer');
-    
-    if(currentChallenge.status === 'active' && isParticipant && !hasFinished) {
-        timerDiv.innerHTML = `
-            <div class="timer-display">
-                <div class="timer-icon">⏱️</div>
-                <h3>Votre chronomètre</h3>
-                <div class="timer-value" id="timerValue">00:00:00.00</div>
-                <button class="btn btn-success btn-lg pulse-animation" onclick="finishRace()">
-                    <span>🏁</span> Terminer la course
-                </button>
-            </div>
-        `;
-        startTimer();
-    } else if(hasFinished) {
-        const time = config.finishTimes[participantId];
-        timerDiv.innerHTML = `
-            <div class="timer-display finished">
-                <div class="timer-icon">🏆</div>
-                <h3>Course terminée !</h3>
-                <div class="timer-value">${formatTime(time)}</div>
+
+    const userTimes = config.times?.[participantId] || {};
+
+    /* =========================
+       ÉTAPES + INPUTS
+    ========================= */
+
+    const raceDiv = document.getElementById('raceTimer');
+
+    if (currentChallenge.status === 'active' && isParticipant) {
+        raceDiv.innerHTML = `
+            <div class="race-steps">
+                <h3>🏁 Étapes de la course</h3>
+                ${config.steps.map(step => {
+                    const ms = userTimes[step.id] || 0;
+                    const min = Math.floor(ms / 60000);
+                    const sec = Math.floor((ms % 60000) / 1000);
+                    const milli = ms % 1000;
+
+                    return `
+                        <div class="race-step">
+                            <div class="step-header">
+                                <strong>${step.name}</strong>
+                            </div>
+
+                            <div class="race-step-time">
+                                <input type="number" min="0"
+                                    value="${min}"
+                                    onchange="updateRaceStepTime('${step.id}', this)">
+                                <span> min </span>
+                                <input type="number" min="0" max="59"
+                                    value="${sec}"
+                                    onchange="updateRaceStepTime('${step.id}', this)">
+                                <span> sec </span>
+                                <input type="number" min="0" max="999"
+                                    value="${milli}"
+                                    onchange="updateRaceStepTime('${step.id}', this)">
+                                <span> ms </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
     } else {
-        timerDiv.innerHTML = '<div class="info-card"><p>⏳ Le chronomètre sera disponible quand la course commencera</p></div>';
+        raceDiv.innerHTML = `
+            <div class="info-card">
+                <p>⏳ La course n’est pas active ou vous ne participez pas</p>
+            </div>
+        `;
     }
+
+    /* =========================
+       CALCUL DES SCORES
+    ========================= */
+
+    const participantTotals = currentChallenge.participants.map(p => {
+        const id = p.type === 'team' ? p.teamId : p.username;
+        const times = config.times?.[id] || {};
+
+        let rawTotal = 0;        // ⏱️ vrai temps
+        let weightedTotal = 0;   // 🧮 score
+
+        config.steps.forEach(step => {
+            const t = times[step.id];
+            if (typeof t === 'number') {
+                rawTotal += t;
+                weightedTotal += t * (step.coef ?? 1);
+            }
+        });
+
+        return {
+            id,
+            name: p.type === 'team' ? p.teamName : p.username,
+            rawTotal,
+            weightedTotal
+        };
+    }).filter(p => p.rawTotal > 0);
+
     
-    // Classement
+    participantTotals.sort((a, b) => a.rawTotal - b.rawTotal);
+
+    if (!currentChallenge.progressions) {
+        currentChallenge.progressions = {};
+    }
+
+    const bestWeightedTime = participantTotals[0]?.weightedTotal ?? 0;
+
+    participantTotals.forEach((p, index) => {
+        const delta = p.weightedTotal - bestWeightedTime;
+        const score = Math.max(0, Math.round(1000 - delta / 10));
+
+        // 🧱 Init progression si absente
+        if (!currentChallenge.progressions[p.id]) {
+            currentChallenge.progressions[p.id] = {};
+        }
+
+        // 💾 Sauvegarde du score
+        currentChallenge.progressions[p.id].score = score;
+    });
+
+    const bestTime = participantTotals[0]?.weightedTotal ?? 0;
+
+    /* =========================
+       CLASSEMENT
+    ========================= */
+
     const rankingsDiv = document.getElementById('raceRankings');
-    const rankings = Object.entries(config.finishTimes)
-        .map(([id, time]) => {
-            const participant = currentChallenge.participants.find(p => 
-                (p.type === 'team' && p.teamId === id) || (p.type === 'player' && p.username === id)
-            );
-            return { 
-                id, 
-                name: participant?.type === 'team' ? participant.teamName : id,
-                time 
-            };
-        })
-        .sort((a, b) => a.time - b.time);
-    
-    if(rankings.length > 0) {
+
+    if (participantTotals.length === 0) {
         rankingsDiv.innerHTML = `
-            <div class="rankings-container">
-                <h3>🏁 Classement</h3>
-                <table class="rankings-table">
-                    <thead>
-                        <tr>
-                            <th>Position</th>
-                            <th>Participant</th>
-                            <th>Temps</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${rankings.map((r, index) => {
-                            const score = config.baseScore - (index * config.scoreDecrement);
-                            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
-                            return `
-                                <tr class="${index < 3 ? 'podium-row' : ''}">
-                                    <td><strong>${medal} ${index + 1}</strong></td>
-                                    <td>${r.name}</td>
-                                    <td>${formatTime(r.time)}</td>
-                                    <td><strong>${Math.max(0, score)} pts</strong></td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
+            <div class="info-card">
+                <p>Aucun temps renseigné</p>
             </div>
         `;
-    } else {
-        rankingsDiv.innerHTML = '<div class="info-card"><p>Aucun participant n\'a terminé</p></div>';
+        return;
     }
+
+    rankingsDiv.innerHTML = `
+        <div class="rankings-container">
+            <h3>📊 Classement</h3>
+            <table class="rankings-table">
+                <thead>
+                    <tr>
+                        <th>Position</th>
+                        <th>Participant</th>
+                        <th>Temps total</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${participantTotals.map((p, index) => {
+                        const delta = p.weightedTotal - bestTime;
+                        const score = Math.max(0, Math.round(1000 - delta / 10));
+                        
+                        const medal =
+                            index === 0 ? '🥇' :
+                            index === 1 ? '🥈' :
+                            index === 2 ? '🥉' : '';
+
+                        return `
+                            <tr class="${index < 3 ? 'podium-row' : ''}">
+                                <td><strong>${medal} ${index + 1}</strong></td>
+                                <td>${p.name}</td>
+                                <td>${formatTime(p.rawTotal)}</td>
+                                <td><strong>${score} pts</strong></td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
 }
 
-function startTimer() {
-    if(!raceStartTime) {
-        raceStartTime = Date.now();
-    }
-    
-    const interval = setInterval(() => {
-        const elapsed = Date.now() - raceStartTime;
-        const timerEl = document.getElementById('timerValue');
-        if(timerEl) {
-            timerEl.textContent = formatTime(elapsed);
-        } else {
-            clearInterval(interval);
+
+function updateRaceStepTime(stepId, input) {
+    const config = currentChallenge.raceConfig;
+
+    // 🔎 Identifier le participant
+    let participantId = null;
+
+    if (currentChallenge.teamFormat === 'team') {
+        const userTeams = teams.filter(t =>
+            t.members.some(m => m.username === currentUser)
+        );
+
+        const participantTeam = currentChallenge.participants.find(p =>
+            p.type === 'team' && userTeams.some(t => t.id === p.teamId)
+        );
+
+        if (participantTeam) {
+            participantId = participantTeam.teamId;
         }
-    }, 10);
+    } else {
+        participantId = currentUser;
+    }
+
+    if (!participantId) return;
+
+    // 🧱 Init des structures
+    if (!config.times) config.times = {};
+    if (!config.times[participantId]) config.times[participantId] = {};
+
+    // 📥 Lire les 3 inputs de l’étape
+    const stepDiv = input.closest('.race-step');
+    const inputs = stepDiv.querySelectorAll('input');
+
+    const minutes = parseInt(inputs[0].value) || 0;
+    const seconds = parseInt(inputs[1].value) || 0;
+    const millis  = parseInt(inputs[2].value) || 0;
+
+    const totalMs =
+        minutes * 60000 +
+        seconds * 1000 +
+        Math.min(millis, 999);
+
+    // 💾 Sauvegarde
+    config.times[participantId][stepId] = totalMs;
+    
+    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
+
+    // 🔄 Rafraîchir affichage / classement
+    renderRace();
 }
 
 function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const millis = Math.floor((ms % 1000) / 10);
-    
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(millis).padStart(2, '0')}`;
+    if (typeof ms !== 'number' || ms < 0) return '00:00.000';
+
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const millis  = Math.floor(ms % 1000);
+
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+    const mmm = String(millis).padStart(3, '0');
+
+    return `${mm}:${ss}.${mmm}`;
 }
 
-function finishRace() {
-    const config = currentChallenge.raceConfig;
-    const finishTime = Date.now() - raceStartTime;
-    
-    const currentUserData = users.find(u => u.username === currentUser);
-    const userTeams = teams.filter(t => t.members.some(m => m.username === currentUser));
-    
-    let participantId = null;
-    let participantName = null;
-    
-    if(currentChallenge.teamFormat === 'team') {
-        const participantTeam = currentChallenge.participants.find(p => 
-            p.type === 'team' && userTeams.some(t => t.id === p.teamId)
-        );
-        if(participantTeam) {
-            participantId = participantTeam.teamId;
-            participantName = participantTeam.teamName;
-        }
-    } else {
-        participantId = currentUser;
-        participantName = currentUser;
-    }
-    
-    if(!participantId) return;
-    
-    config.finishTimes[participantId] = finishTime;
-    
-    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
-    ws.send(JSON.stringify({ type: 'notification', text: `${participantName} a terminé la course en ${formatTime(finishTime)} !` }));
-    
-    showNotification('Course terminée !');
-}
 
 // ========== MARATHON ==========
 function renderMarathon() {

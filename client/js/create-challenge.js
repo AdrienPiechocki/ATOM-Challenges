@@ -8,6 +8,7 @@ const formatDescriptions = {
 
 let marathonObjectives = [];
 let negativeObjectives = [];
+let runSteps = [];
 let bingoObjectives = [];
 let bingoSize = 3;
 
@@ -23,6 +24,7 @@ document.getElementById('formatChallenge').addEventListener('change', (e) => {
     const descEl = document.getElementById('formatDescription');
     
     // Masquer toutes les configs
+    document.getElementById('courseConfig').classList.add('hidden');
     document.getElementById('marathonConfig').classList.add('hidden');
     document.getElementById('bingoConfig').classList.add('hidden');
     
@@ -34,6 +36,9 @@ document.getElementById('formatChallenge').addEventListener('change', (e) => {
         if(format === 'marathon') {
             document.getElementById('marathonConfig').classList.remove('hidden');
             renderObjectivesList();
+        } else if(format === 'course') {
+            document.getElementById('courseConfig').classList.remove('hidden');
+            renderStepsList();
         } else if(format === 'bingo') {
             document.getElementById('bingoConfig').classList.remove('hidden');
         }
@@ -162,6 +167,38 @@ function renderNegativeObjectivesList() {
 }
 
 
+// --- Gestion de la Course ---
+function renderStepsList() {
+    const list = document.getElementById('stepsList');
+    
+    if(runSteps.length === 0) {
+        list.innerHTML = '<p style="color: var(--gray); font-style: italic;">Aucune étape définie</p>';
+        return;
+    }
+
+    list.innerHTML = runSteps.map((obj, index) => `
+        <div class="objective-item" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
+            <input type="text" placeholder="Nom de l'étape" value="${obj.name}" 
+                   onchange="runSteps[${index}].name = this.value" 
+                   style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeStep('${obj.id}')">✕</button>
+        </div>
+    `).join('');
+}
+
+function removeStep(id) {
+    runSteps = runSteps.filter(o => o.id !== id);
+    renderStepsList();
+}
+
+function addStep() {
+    runSteps.push({
+        id: '_' + Math.random().toString(36).substr(2, 9),
+        name: '',
+    });
+    renderStepsList();
+}
 
 // --- Gestion de la grille Bingo ---
 function generateBingoGrid() {
@@ -293,7 +330,19 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
     }
 
     // --- Ajouter la configuration spécifique selon le format ---
-    if(formatChallenge === 'marathon') {
+    if(formatChallenge === 'tournoi') {
+        newChallenge.tournamentConfig = {
+            groups: [],
+            bracket: [],
+            currentPhase: 'waiting'
+        };
+    } else if(formatChallenge === 'course') {
+        newChallenge.raceConfig = {
+            steps: runSteps.map(o => ({...o})),
+            times: {},
+            rankings: []
+        };
+    } else if(formatChallenge === 'marathon') {
         if(marathonObjectives.length === 0) {
             showNotification('Veuillez ajouter au moins un objectif pour le marathon', 'error');
             return;
