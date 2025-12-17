@@ -828,19 +828,18 @@ body {
 
 .podium-medal {
   font-size: 4rem;
-  margin-bottom: 1rem;
 }
 
 .podium-info h3 {
   font-size: 1.5rem;
   color: var(--dark);
-  margin-bottom: 0.5rem;
 }
 
 .podium-info p {
   font-size: 1.2rem;
   font-weight: bold;
   color: var(--warning);
+  text-shadow: -1px -1px 0 #00000050, 1px -1px 0 #00000050, -1px 1px 0 #00000050, 1px 1px 0 #00000050;
 }
 
 .podium-rank {
