@@ -23,7 +23,7 @@
             <div class="nav-user">
                 <span class="user-points" id="userPoints">💰 0 pts</span>
                 <span class="user-name" id="userName">Utilisateur</span>
-                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Déconnexion</button>
             </div>
         </div>
     </nav>
@@ -37,21 +37,26 @@
         <!-- Tournoi -->
         <div id="tournamentMechanics" class="mechanics-container hidden">
             <div class="mechanics-section">
-                <h3>⚔️ Phase de Poule</h3>
-                <div id="groupsDisplay"></div>
-                <div id="groupsActions"></div>
+                <div class="section-header">
+                    <h3>⚔️ Tirage au sort</h3>
+                </div>
+                <div id="groupsDisplay" class="groups-container"></div>
+                <div id="groupsActions" class="actions-container"></div>
             </div>
             <div class="mechanics-section">
-                <h3>🏆 Arbre Éliminatoire</h3>
-                <div id="bracketDisplay"></div>
+                <div class="section-header">
+                    <h3>🏆 Arbre Éliminatoire</h3>
+                </div>
+                <div id="bracketDisplay" class="bracket-container"></div>
             </div>
         </div>
 
         <!-- Course -->
         <div id="raceMechanics" class="mechanics-container hidden">
             <div class="mechanics-section">
-                <h3>🏁 Chronomètre et Classement</h3>
                 <div id="raceTimer" class="race-timer"></div>
+            </div>
+            <div class="mechanics-section">
                 <div id="raceRankings" class="race-rankings"></div>
             </div>
         </div>
@@ -59,11 +64,12 @@
         <!-- Marathon -->
         <div id="marathonMechanics" class="mechanics-container hidden">
             <div class="mechanics-section">
-                <h3>🎯 Objectifs du Marathon</h3>
+                <div class="section-header">
+                    <h3>🎯 Objectifs du Marathon</h3>
+                </div>
                 <div id="marathonObjectives" class="marathon-objectives"></div>
             </div>
             <div class="mechanics-section">
-                <h3>📊 Progression des participants</h3>
                 <div id="marathonProgress"></div>
             </div>
         </div>
@@ -71,11 +77,12 @@
         <!-- Bingo -->
         <div id="bingoMechanics" class="mechanics-container hidden">
             <div class="mechanics-section">
-                <h3>🎲 Grille de Bingo</h3>
+                <div class="section-header">
+                    <h3>🎲 Grille de Bingo</h3>
+                </div>
                 <div id="bingoGrid" class="bingo-grid"></div>
             </div>
             <div class="mechanics-section">
-                <h3>🏅 Progression</h3>
                 <div id="bingoProgress"></div>
             </div>
         </div>

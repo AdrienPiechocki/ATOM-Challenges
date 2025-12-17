@@ -1,32 +1,56 @@
-let teams = [];
+// Variables globales
+let myTeams = [];
+let allTeams = [];
 
-
-
-const originalHandleMessage = window.handleWebSocketMessage;
-window.handleWebSocketMessage = function(data) {
-    originalHandleMessage(data);
-    _handleWebSocketMessage(data);
-};
-
-function _handleWebSocketMessage(data) {
+// Fonction pour gérer les messages WebSocket spécifiques aux équipes
+function handleTeamsWebSocketMessage(data) {
     if(data.type === 'init') {
         teams = data.teams || [];
+        renderTeams();
     } else if(data.type === 'updateTeams') {
-        teams = data.teams;
-    }
-    
-    if(typeof updatePageData === 'function') {
-        updatePageData();
+        teams = data.teams || [];
+        renderTeams();
     }
 }
 
+// Override de updatePageData pour cette page
 function updatePageData() {
+    console.log('updatePageData appelé pour teams.js');
+    updateUserInfo();
     renderTeams();
 }
 
+// Attendre que le DOM soit chargé
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('teams.js chargé');
+    
+    // Attendre que WebSocket soit connecté
+    const checkWebSocket = setInterval(() => {
+        if(typeof ws !== 'undefined' && ws.readyState === WebSocket.OPEN) {
+            clearInterval(checkWebSocket);
+            renderTeams();
+        }
+    }, 100);
+    
+    // Setup du formulaire de création d'équipe
+    const createTeamForm = document.getElementById('createTeamForm');
+    if(createTeamForm) {
+        createTeamForm.addEventListener('submit', handleCreateTeam);
+    }
+});
+
 function renderTeams() {
-    const myTeams = teams.filter(t => t.members.includes(currentUser));
-    const otherTeams = teams.filter(t => !t.members.includes(currentUser));
+    if(!teams || teams.length === 0) {
+        console.log('Aucune équipe à afficher');
+        document.getElementById('myTeamsList').innerHTML = '<p class="empty-state">Vous n\'êtes dans aucune équipe</p>';
+        document.getElementById('allTeamsList').innerHTML = '<p class="empty-state">Aucune équipe disponible</p>';
+        return;
+    }
+    
+    myTeams = teams.filter(t => t.members && t.members.includes(currentUser));
+    allTeams = teams.filter(t => !t.members || !t.members.includes(currentUser));
+    
+    console.log('Rendu des équipes:', { myTeams, allTeams });
     
     // Mes équipes
     const myTeamsDiv = document.getElementById('myTeamsList');
@@ -38,10 +62,10 @@ function renderTeams() {
     
     // Toutes les équipes
     const allTeamsDiv = document.getElementById('allTeamsList');
-    if(otherTeams.length === 0) {
+    if(allTeams.length === 0) {
         allTeamsDiv.innerHTML = '<p class="empty-state">Aucune équipe disponible</p>';
     } else {
-        allTeamsDiv.innerHTML = otherTeams.map(team => renderTeamCard(team, false)).join('');
+        allTeamsDiv.innerHTML = allTeams.map(team => renderTeamCard(team, false)).join('');
     }
 }
 
@@ -80,10 +104,11 @@ function openCreateTeamModal() {
 
 function closeCreateTeamModal() {
     document.getElementById('createTeamModal').classList.add('hidden');
-    document.getElementById('createTeamForm').reset();
+    const form = document.getElementById('createTeamForm');
+    if(form) form.reset();
 }
 
-document.getElementById('createTeamForm').addEventListener('submit', (e) => {
+function handleCreateTeam(e) {
     e.preventDefault();
     
     const name = document.getElementById('teamName').value;
@@ -107,11 +132,14 @@ document.getElementById('createTeamForm').addEventListener('submit', (e) => {
     };
     
     teams.push(newTeam);
-    ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    
+    if(ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    }
     
     closeCreateTeamModal();
     showNotification('Équipe créée avec succès !');
-});
+}
 
 function joinTeam(teamId) {
     const team = teams.find(t => t.id === teamId);
@@ -135,7 +163,10 @@ function joinTeam(teamId) {
     }
     
     team.members.push(currentUser);
-    ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    
+    if(ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    }
     
     showNotification(`Vous avez rejoint l'équipe ${team.name}`);
 }
@@ -159,7 +190,10 @@ function leaveTeam(teamId) {
         }
     }
     
-    ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    if(ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    }
+    
     showNotification('Vous avez quitté l\'équipe');
 }
 
@@ -167,7 +201,10 @@ function deleteTeam(teamId) {
     if(!confirm('Êtes-vous sûr de vouloir supprimer cette équipe ?')) return;
     
     teams = teams.filter(t => t.id !== teamId);
-    ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    
+    if(ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    }
     
     showNotification('Équipe supprimée');
 }
@@ -221,7 +258,10 @@ function kickMember(teamId, username) {
     if(!team || team.leader !== currentUser) return;
     
     team.members = team.members.filter(m => m !== username);
-    ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    
+    if(ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'updateTeams', teams }));
+    }
     
     showNotification(`${username} a été expulsé de l'équipe`);
     closeTeamDetailModal();

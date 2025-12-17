@@ -9,13 +9,18 @@ const formatDescriptions = {
 let marathonObjectives = [];
 let bingoObjectives = [];
 
-// Afficher la description du format et la config associée
+// --- Sélecteurs équipe ---
+const teamFormatSelect = document.getElementById('teamFormat');
+const teamConfig = document.getElementById('teamConfig');
+const minPlayersInput = document.getElementById('minPlayers');
+const maxPlayersInput = document.getElementById('maxPlayers');
+
+// --- Affichage description format + configuration associée ---
 document.getElementById('formatChallenge').addEventListener('change', (e) => {
     const format = e.target.value;
     const descEl = document.getElementById('formatDescription');
     
     // Masquer toutes les configs
-    document.getElementById('tournoiConfig').classList.add('hidden');
     document.getElementById('courseConfig').classList.add('hidden');
     document.getElementById('marathonConfig').classList.add('hidden');
     document.getElementById('bingoConfig').classList.add('hidden');
@@ -40,7 +45,7 @@ document.getElementById('formatChallenge').addEventListener('change', (e) => {
     }
 });
 
-// Afficher/masquer le champ mot de passe
+// --- Afficher/masquer mot de passe ---
 document.getElementById('visibility').addEventListener('change', (e) => {
     const passwordGroup = document.getElementById('passwordGroup');
     if(e.target.value === 'password') {
@@ -50,7 +55,16 @@ document.getElementById('visibility').addEventListener('change', (e) => {
     }
 });
 
-// Gestion des objectifs Marathon
+// --- Affichage section équipe si besoin ---
+teamFormatSelect.addEventListener('change', () => {
+    if (teamFormatSelect.value === 'team') {
+        teamConfig.classList.remove('hidden');
+    } else {
+        teamConfig.classList.add('hidden');
+    }
+});
+
+// --- Gestion des objectifs Marathon ---
 function addObjective() {
     marathonObjectives.push({
         id: '_' + Math.random().toString(36).substr(2, 9),
@@ -92,7 +106,7 @@ function renderObjectivesList() {
     `).join('');
 }
 
-// Gestion de la grille Bingo
+// --- Gestion de la grille Bingo ---
 function generateBingoGrid() {
     bingoObjectives = Array(25).fill(null).map((_, i) => ({
         id: i,
@@ -121,9 +135,23 @@ function renderBingoGrid() {
     `;
 }
 
-// Création du défi
+// --- Création du défi ---
+let lastChallengeSubmit = 0;
+const CHALLENGE_SUBMIT_COOLDOWN = 5000; // 5 secondes
+
 document.getElementById('createChallengeForm').addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const now = Date.now();
+    if (now - lastChallengeSubmit < CHALLENGE_SUBMIT_COOLDOWN) {
+        const remaining = Math.ceil(
+            (CHALLENGE_SUBMIT_COOLDOWN - (now - lastChallengeSubmit)) / 1000
+        );
+        showNotification(`⏳ Veuillez attendre ${remaining}s avant de recréer un défi`, 'error');
+        return;
+    }
+
+    lastChallengeSubmit = now;
     
     const user = users.find(u => u.username === currentUser);
     if(!user) return;
@@ -133,8 +161,8 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
     const teamFormat = document.getElementById('teamFormat').value;
     const formatChallenge = document.getElementById('formatChallenge').value;
     const rulesChallenge = document.getElementById('rulesChallenge').value;
-    const minPoints = parseInt(document.getElementById('minPoints').value) || 0;
-    const maxPoints = parseInt(document.getElementById('maxPoints').value) || 100;
+    const minPoints = parseInt(document.getElementById('minPoints').value);
+    const maxPoints = parseInt(document.getElementById('maxPoints').value);
     const visibility = document.getElementById('visibility').value;
     const challengePassword = document.getElementById('challengePassword').value;
     
@@ -155,32 +183,40 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         visibility: visibility,
         password: visibility === 'password' ? challengePassword : null,
         organizer: currentUser,
-        participants: [{
-            username: currentUser,
-            bet: 0,
-            score: 0,
-            modifier: 0,
-            multiplier: 1
-        }],
+        participants: [],
         progressions: {},
         status: 'waiting',
         createdAt: Date.now()
     };
-    
-    // Ajouter la configuration spécifique selon le format
+
+    // --- Ajouter la config équipe si nécessaire ---
+    if(teamFormat === 'team') {
+        const minPlayers = parseInt(minPlayersInput.value);
+        const maxPlayers = parseInt(maxPlayersInput.value);
+
+        if(isNaN(minPlayers) || isNaN(maxPlayers) || minPlayers > maxPlayers) {
+            showNotification('Le nombre minimum de joueurs par équipe doit être inférieur ou égal au maximum', 'error');
+            return;
+        }
+
+        newChallenge.teamConfig = {
+            minPlayersPerTeam: minPlayers,
+            maxPlayersPerTeam: maxPlayers
+        };
+    }
+
+    // --- Ajouter la configuration spécifique selon le format ---
     if(formatChallenge === 'tournoi') {
         newChallenge.tournamentConfig = {
-            groupSize: parseInt(document.getElementById('groupSize').value),
-            qualifiedPerGroup: parseInt(document.getElementById('qualifiedPerGroup').value),
             groups: [],
             bracket: [],
-            currentPhase: 'waiting' // waiting, groups, bracket, finished
+            currentPhase: 'waiting'
         };
     } else if(formatChallenge === 'course') {
         newChallenge.raceConfig = {
             baseScore: parseInt(document.getElementById('baseScore').value) || 100,
             scoreDecrement: parseInt(document.getElementById('scoreDecrement').value) || 10,
-            finishTimes: {}, // username: timestamp
+            finishTimes: {},
             rankings: []
         };
     } else if(formatChallenge === 'marathon') {
@@ -194,7 +230,7 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         }
         newChallenge.marathonConfig = {
             objectives: marathonObjectives.map(o => ({...o})),
-            completions: {} // username: [objectiveId, objectiveId, ...]
+            completions: {}
         };
     } else if(formatChallenge === 'bingo') {
         if(bingoObjectives.length !== 25) {
@@ -207,24 +243,15 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         }
         newChallenge.bingoConfig = {
             grid: bingoObjectives.map(o => ({...o})),
-            completions: {} // username: [position, position, ...]
+            completions: {}
         };
     }
-    
-    // Initialiser les progressions
-    newChallenge.progressions[currentUser] = {
-        submissions: [],
-        score: 0,
-        validated: 0,
-        rejected: 0,
-        cheated: false
-    };
     
     challenges.push(newChallenge);
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
     
-    showNotification('Défi créé avec succès !');
+    showNotification('Défi créé avec succès ! Vous pouvez maintenant le rejoindre depuis la liste des défis.');
     setTimeout(() => {
         window.location.href = `challenge-detail.html?id=${newChallenge.id}`;
-    }, 1000);
+    }, 1500);
 });

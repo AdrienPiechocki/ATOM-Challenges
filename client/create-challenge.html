@@ -23,7 +23,7 @@
             <div class="nav-user">
                 <span class="user-points" id="userPoints">💰 0 pts</span>
                 <span class="user-name" id="userName">Utilisateur</span>
-                <button class="btn btn-secondary btn-sm" onclick="logout()">Déconnexion</button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Déconnexion</button>
             </div>
         </div>
     </nav>
@@ -76,24 +76,19 @@
                     <div class="format-description" id="formatDescription"></div>
                 </div>
 
-                <!-- Configuration Tournoi -->
-                <div class="form-section hidden" id="tournoiConfig">
-                    <h3>⚔️ Configuration Tournoi</h3>
+                <!-- Configuration équipes -->
+                <div class="form-section hidden" id="teamConfig">
+                    <h3>👥 Configuration des équipes</h3>
+
                     <div class="form-group">
-                        <label for="groupSize">Taille des groupes (phase de poule)</label>
-                        <select id="groupSize">
-                            <option value="4">4 joueurs par groupe</option>
-                            <option value="5">5 joueurs par groupe</option>
-                            <option value="6">6 joueurs par groupe</option>
-                        </select>
-                        <p class="help-text">Les meilleurs de chaque groupe passeront en phase éliminatoire</p>
+                        <label for="minPlayers">Joueurs minimum par équipe *</label>
+                        <input type="number" id="minPlayers" min="1" max="10" value="2" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="qualifiedPerGroup">Qualifiés par groupe</label>
-                        <select id="qualifiedPerGroup">
-                            <option value="1">1er de chaque groupe</option>
-                            <option value="2">2 premiers de chaque groupe</option>
-                        </select>
+                        <label for="maxPlayers">Joueurs maximum par équipe *</label>
+                        <input type="number" id="maxPlayers" min="1" max="10" value="5" required>
+                        <p class="help-text">Le maximum doit être supérieur ou égal au minimum</p>
                     </div>
                 </div>
 
@@ -149,13 +144,14 @@
                 </div>
 
                 <div class="form-section">
-                    <h3>Visibilité et accès</h3>
+                    <h3>Accès au défi</h3>
                     <div class="form-group">
-                        <label for="visibility">Visibilité *</label>
+                        <label for="visibility">Accès *</label>
                         <select id="visibility" required>
-                            <option value="public">Tout le monde (Public)</option>
-                            <option value="password">Protégé par mot de passe (Public)</option>
-                            <option value="friends">Amis seulement (Privé)</option>
+                            <option value="public">Tout le monde</option>
+                            <option value="password">Protégé par mot de passe</option>
+                            <option value="friends">Amis seulement</option>
+                            <!--<option value="invite">Sur invitation</option> -->
                         </select>
                     </div>
                     <div class="form-group hidden" id="passwordGroup">

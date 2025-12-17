@@ -7,33 +7,69 @@ let currentFilters = {
 let selectedChallengeForJoin = null;
 
 function updatePageData() {
+    console.log('updatePageData called, challenges:', challenges);
     renderChallenges();
 }
 
 // Filtres
-document.getElementById('filterStatus').addEventListener('change', (e) => {
-    currentFilters.status = e.target.value;
-    renderChallenges();
-});
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, challenges:', challenges);
+    
+    document.getElementById('filterStatus').addEventListener('change', (e) => {
+        currentFilters.status = e.target.value;
+        renderChallenges();
+    });
 
-document.getElementById('filterFormat').addEventListener('change', (e) => {
-    currentFilters.format = e.target.value;
+    document.getElementById('filterFormat').addEventListener('change', (e) => {
+        currentFilters.format = e.target.value;
+        renderChallenges();
+    });
+
+    document.getElementById('filterTeamFormat').addEventListener('change', (e) => {
+        currentFilters.type = e.target.value;
+        renderChallenges();
+    });
+    
+    // Render initial challenges
     renderChallenges();
 });
 
 function renderChallenges() {
+    console.log('renderChallenges called');
     const list = document.getElementById('challengesList');
     
+    if(!list) {
+        console.error('challengesList element not found');
+        return;
+    }
+    
     if(!challenges || challenges.length === 0) {
+        console.log('No challenges found');
         list.innerHTML = '<p class="empty-state">Aucun défi disponible</p>';
         return;
     }
     
+    console.log('Filtering challenges, total:', challenges.length);
+    
     let filtered = challenges.filter(c => {
-        if(currentFilters.status !== 'all' && c.status !== currentFilters.status) return false;
-        if(currentFilters.format !== 'all' && c.format !== currentFilters.format) return false;
+        // Filtre statut
+        if (currentFilters.status !== 'all' && c.status !== currentFilters.status) {
+            return false;
+        }
+        // Filtre format de défi (tournoi, course, etc.)
+        if (currentFilters.format !== 'all' && c.format !== currentFilters.format) {
+            return false;
+        }
+        // Filtre SOLO / ÉQUIPE
+        if (currentFilters.type !== 'all') {
+            if (currentFilters.type === 'solo' && c.teamFormat !== 'solo') return false;
+            if (currentFilters.type === 'team' && c.teamFormat !== 'team') return false;
+        }
         return true;
     });
+
+
+    console.log('Filtered challenges:', filtered.length);
     
     if(filtered.length === 0) {
         list.innerHTML = '<p class="empty-state">Aucun défi trouvé</p>';
@@ -41,7 +77,27 @@ function renderChallenges() {
     }
     
     list.innerHTML = filtered.map(challenge => {
-        const isParticipant = challenge.participants && challenge.participants.some(p => p.username === currentUser);
+        const currentUserData = users.find(u => u.username === currentUser);
+        const userTeams = teams.filter(t => t.members.some(m => m.username === currentUser));
+        
+        // Vérifier si l'utilisateur ou son équipe participe
+        let isParticipant = false;
+        let participantType = null;
+        
+        if(challenge.teamFormat === 'team') {
+            // Défi en équipe : vérifier si une équipe de l'utilisateur participe
+            isParticipant = challenge.participants.some(
+                p => p.username === currentUser || (p.type === 'team' && p.members.includes(currentUser))
+            );
+            participantType = 'team';
+        } else {
+            // Défi solo : vérifier si l'utilisateur participe
+            isParticipant = challenge.participants && challenge.participants.some(p => 
+                p.type === 'player' && p.username === currentUser
+            );
+            participantType = 'player';
+        }
+        
         const canJoin = !isParticipant && challenge.status === 'waiting';
         
         return `
@@ -50,7 +106,7 @@ function renderChallenges() {
                     <h3>${challenge.name}</h3>
                     <p><strong>Jeu:</strong> ${challenge.game}</p>
                     <div class="challenge-meta">
-                        <span class="badge type">${challenge.teamFormat || 'Solo'}</span>
+                        <span class="badge type">${challenge.teamFormat === 'team' ? 'Équipe' : 'Solo'}</span>
                         <span class="badge format">${getFormatText(challenge.format)}</span>
                         ${getStatusBadge(challenge.status)}
                         <span class="badge">Mise: ${challenge.minBet}-${challenge.maxBet} pts</span>
@@ -66,90 +122,114 @@ function renderChallenges() {
             </div>
         `;
     }).join('');
+    
+    console.log('Challenges rendered');
 }
 
 function openJoinModal(challengeId) {
     const challenge = challenges.find(c => c.id === challengeId);
-    if(!challenge) return;
-    
+    if (!challenge) return;
+
     selectedChallengeForJoin = challengeId;
-    
     document.getElementById('joinChallengeName').textContent = challenge.name;
+
+    const teamSection = document.getElementById('teamSelectionSection');
+    const teamSelect = document.getElementById('teamSelect');
+
+    if (challenge.teamFormat === "team") {
+        teamSection.classList.remove('hidden');
+        
+        // On récupère les équipes de l'utilisateur qui ne sont pas déjà inscrites au défi
+        const userTeams = teams.filter(t =>
+            t.members.includes(currentUser) &&
+            !challenge.participants.some(p => p.type === 'team' && p.teamId === t.id)
+        );
+
+        if(userTeams.length === 0){
+            showNotification('Vous devez faire partie d\'une équipe pour rejoindre ce défi', 'error');
+            return;
+        }
+
+        teamSelect.innerHTML = userTeams
+            .map(t => `<option value="${t.id}">${t.name}</option>`)
+            .join('');
+    } else {
+        teamSection.classList.add('hidden');
+    }
+
+
     document.getElementById('minBet').textContent = challenge.minBet;
     document.getElementById('maxBet').textContent = challenge.maxBet;
-    document.getElementById('betAmount').value = challenge.minBet;
-    document.getElementById('betAmount').min = challenge.minBet;
-    document.getElementById('betAmount').max = challenge.maxBet;
-    
-    if(challenge.visibility === 'password') {
-        document.getElementById('passwordSection').classList.remove('hidden');
-    } else {
-        document.getElementById('passwordSection').classList.add('hidden');
-    }
-    
+
+    if (challenge.password) document.getElementById('passwordSection').classList.remove('hidden');
+    else document.getElementById('passwordSection').classList.add('hidden');
+
     document.getElementById('joinModal').classList.remove('hidden');
 }
 
 function closeJoinModal() {
     document.getElementById('joinModal').classList.add('hidden');
     selectedChallengeForJoin = null;
-    document.getElementById('joinPassword').value = '';
-    document.getElementById('betAmount').value = '';
 }
 
 function confirmJoin() {
-    const challenge = challenges.find(c => c.id === selectedChallengeForJoin);
-    const user = users.find(u => u.username === currentUser);
-    
-    if(!challenge || !user) return;
-    
-    if(challenge.visibility === 'password') {
-        const password = document.getElementById('joinPassword').value;
-        if(password !== challenge.password) {
-            showNotification('Mot de passe incorrect', 'error');
-            return;
-        }
+    if (!selectedChallengeForJoin) return;
+
+    const challenge = challenges.find(c => String(c.id) === String(selectedChallengeForJoin));
+    if (!challenge) return;
+
+    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1 };
+
+    if (challenge.teamFormat === "team") {
+        const teamId = document.getElementById('teamSelect').value;
+
+        // On récupère l'équipe parmi toutes les équipes de l'utilisateur
+        const team = teams.find(t => t.id === teamId && t.members.includes(currentUser));
+        if (!team) return showNotification('Équipe invalide', 'error');
+
+        // Vérifier si l'utilisateur est le leader
+        const isLeader = team.isLeader || team.members[0] === currentUser;
+        if (!isLeader) return showNotification('Seul le leader peut inscrire l’équipe', 'error');
+
+        participant = {
+            teamId: team.id,
+            teamName: team.name,
+            type: 'team',
+            members: team.members,
+            bet: 0,
+            modifier: 0,
+            multiplier: 1,
+            isLeader: true // Marquer le leader
+        };
     }
-    
-    const bet = parseInt(document.getElementById('betAmount').value);
-    
-    if(isNaN(bet) || bet < challenge.minBet || bet > challenge.maxBet) {
-        showNotification('Mise invalide', 'error');
-        return;
+
+    const betAmount = parseInt(document.getElementById('betAmount').value);
+    if (isNaN(betAmount) || betAmount < challenge.minBet || betAmount > challenge.maxBet) {
+        return showNotification('Mise invalide', 'error');
     }
-    
-    if(bet > user.totalPoints) {
-        showNotification('Vous n\'avez pas assez de points', 'error');
-        return;
+    participant.bet = betAmount;
+
+    if (challenge.password) {
+        const pass = document.getElementById('joinPassword').value;
+        if (pass !== challenge.password) return showNotification('Mot de passe incorrect', 'error');
     }
-    
-    // Initialiser participants si nécessaire
-    if(!challenge.participants) challenge.participants = [];
-    
-    challenge.participants.push({
-        username: currentUser,
-        bet: bet,
-        score: 0,
-        modifier: 0,
-        multiplier: 1
-    });
-    
-    user.totalPoints -= bet;
-    
-    // Initialiser progressions si nécessaire
-    if(!challenge.progressions) challenge.progressions = {};
-    challenge.progressions[currentUser] = {
-        submissions: [],
-        score: 0,
-        validated: 0,
-        rejected: 0,
-        cheated: false
-    };
-    
+
+    challenge.participants.push(participant);
+
+    // Déduire les points du joueur ou de l'équipe
+    if (participant.type === 'team') {
+        participant.members.forEach(username => {
+            const user = users.find(u => u.username === username);
+            if (user) user.totalPoints -= betAmount;
+        });
+    } else {
+        const user = users.find(u => u.username === currentUser);
+        if (user) user.totalPoints -= betAmount;
+    }
+
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
     ws.send(JSON.stringify({ type: 'updateUsers', users }));
-    ws.send(JSON.stringify({ type: 'notification', text: `${currentUser} a rejoint le défi "${challenge.name}"` }));
-    
+
     closeJoinModal();
-    showNotification('Vous avez rejoint le défi !');
+    showNotification('Vous avez rejoint le défi');
 }

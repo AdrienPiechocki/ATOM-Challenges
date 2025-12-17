@@ -9,7 +9,7 @@ function updateStats() {
     if(!user) return;
     
     const myChallenges = challenges.filter(c => 
-        c.participants.some(p => p.username === currentUser)
+        c.participants.some(p => p.username === currentUser || (p.type === 'team' && p.members.includes(currentUser)))
     );
     
     const active = myChallenges.filter(c => c.status === 'active').length;
@@ -26,7 +26,7 @@ function updateStats() {
 function updateMyChallenges() {
     const list = document.getElementById('myChallengesList');
     const myChallenges = challenges.filter(c => 
-        c.participants.some(p => p.username === currentUser) && 
+        c.participants.some(p => p.username === currentUser || (p.type === 'team' && p.members.includes(currentUser))) && 
         (c.status === 'waiting' || c.status === 'active')
     );
     
@@ -40,7 +40,7 @@ function updateMyChallenges() {
             <h3>${challenge.name}</h3>
             <p><strong>Jeu:</strong> ${challenge.game}</p>
             <div class="challenge-meta">
-                <span class="badge type">${challenge.type}</span>
+                <span class="badge type">${challenge.teamFormat}</span>
                 <span class="badge format">${getFormatText(challenge.format)}</span>
                 ${getStatusBadge(challenge.status)}
             </div>
@@ -54,7 +54,7 @@ function updateMyChallenges() {
 function updateRecentChallenges() {
     const list = document.getElementById('recentChallengesList');
     const recentChallenges = challenges
-        .filter(c => !c.participants.some(p => p.username === currentUser))
+        .filter(c => !c.participants.some(p => p.username === currentUser || (p.type === 'team' && p.members.includes(currentUser))))
         .sort((a, b) => b.createdAt - a.createdAt)
         .slice(0, 5);
     

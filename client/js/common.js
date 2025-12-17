@@ -4,6 +4,7 @@ let token = null;
 let challenges = [];
 let users = [];
 let messages = {};
+let teams = [];
 
 // Vérifier l'authentification
 function checkAuth() {
@@ -56,6 +57,7 @@ function handleWebSocketMessage(data) {
             challenges = data.challenges;
             users = data.users;
             messages = data.messages;
+            teams = data.teams;
             updateUserInfo();
             if(typeof updatePageData === 'function') {
                 updatePageData();
@@ -70,6 +72,13 @@ function handleWebSocketMessage(data) {
         case 'updateUsers':
             users = data.users;
             updateUserInfo();
+            if(typeof updatePageData === 'function') {
+                updatePageData();
+            }
+            break;
+        case 'updateTeams':
+            teams = data.teams;
+            console.log('Teams mis à jour:', teams);
             if(typeof updatePageData === 'function') {
                 updatePageData();
             }

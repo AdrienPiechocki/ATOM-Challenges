@@ -1,5 +1,84 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "_0s1c5xzm2",
+      "username": "Azimiro",
+      "passwordHash": "$2a$10$DUDcXGnCY9GMVogCqxKn6u6iHc32UDx2ZR5xT2CWFIfy7AtgghpE.",
+      "totalPoints": -5,
+      "friends": [
+        "Khbgbgk"
+      ],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    },
+    {
+      "id": "_hvjxqjqri",
+      "username": "Khbgbgk",
+      "passwordHash": "$2a$10$13Tj4yiTD.6rQfd/kIbWBeEps1J1KwW4DB9EI.gGoY7uJ.QCJOEie",
+      "totalPoints": 295,
+      "friends": [
+        "Azimiro"
+      ],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    },
+    {
+      "id": "_x7xm1q4cl",
+      "username": "RedScipio",
+      "passwordHash": "$2a$10$N2wEtJpQQKMCMHrm32cyqusoHJnzpHJYkabIITgyX89Hbp60xBxLC",
+      "totalPoints": 100,
+      "friends": [
+        "Hakiro"
+      ],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    },
+    {
+      "id": "_0rpzft7ai",
+      "username": "Hakiro",
+      "passwordHash": "$2a$10$0YS4xFufQJk0Top/5gvhxuJ6qeFLwUuWdCTt/RXtwIU6XZO0.DTxu",
+      "totalPoints": 100,
+      "friends": [
+        "RedScipio"
+      ],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "cheated": false
+    }
+  ],
   "challenges": [],
-  "messages": {}
+  "messages": {},
+  "teams": [
+    {
+      "id": "_p4yq6yhc2",
+      "name": "Traficant",
+      "tag": "TRAF",
+      "leader": "Azimiro",
+      "members": [
+        "Azimiro",
+        "Khbgbgk"
+      ],
+      "maxMembers": 5,
+      "createdAt": 1765980393679
+    },
+    {
+      "id": "_w6k3sepoy",
+      "name": "Goulus",
+      "tag": "GOU",
+      "leader": "RedScipio",
+      "members": [
+        "RedScipio",
+        "Hakiro"
+      ],
+      "maxMembers": 5,
+      "createdAt": 1765984005861
+    }
+  ]
 }
