@@ -150,17 +150,25 @@ function startBracket() {
         }
     });
 
+    // Mélanger pour éviter des patterns fixes
+    for (let i = qualified.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [qualified[i], qualified[j]] = [qualified[j], qualified[i]];
+    }
+
     // Créer le bracket simple
     const bracket = [];
-    for (let i = 0; i < qualified.length; i += 2) {
-        if (qualified[i + 1]) {
-            bracket.push({
-                player1: qualified[i],
-                player2: qualified[i + 1],
-                winner: null,
-                round: 1
-            });
-        }
+    let i = 0;
+    while (i < qualified.length) {
+        const player1 = qualified[i];
+        const player2 = qualified[i + 1] || null; // si nombre impair, player2 sera null
+        bracket.push({
+            player1,
+            player2,
+            winner: player2 ? null : player1, // joueur seul passe automatiquement
+            round: 1
+        });
+        i += 2;
     }
 
     config.bracket = bracket;
@@ -189,30 +197,30 @@ function renderBracket(bracket, isOrganizer) {
                 ${rounds[round].map((match, index) => {
                     const p1 = match.player1 ? match.player1.name : '';
                     const p2 = match.player2 ? match.player2.name : '';
-                    if (p1 == '' || p2 == '') return `
-                        <div class="bracket-match ${match.winner ? 'finished' : 'pending'}">
-                            <div class="match-players">
-                                <div class="match-player winner">
-                                    <span class="player-icon">👑</span>
-                                    <span class="player-name">${match.winner && match.winner.id === match.player1?.id ? p2 : p1}</span>
+                    
+                    // Si un joueur est seul, on n’affiche pas de BYE
+                    if (!match.player2) {
+                        return `
+                            <div class="bracket-match bye">
+                                <div class="match-player">
+                                    <span class="player-name">${p1} passe automatiquement</span>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
+
                     return `
                         <div class="bracket-match ${match.winner ? 'finished' : 'pending'}">
                             <div class="match-players">
                                 <div class="match-player ${match.winner && match.winner.id === match.player1?.id ? 'winner' : match.winner ? 'loser' : ''}">
-                                    <span class="player-icon">${match.winner && match.winner.id === match.player1?.id ? '👑' : '🎮'}</span>
                                     <span class="player-name">${p1}</span>
                                 </div>
                                 <div class="match-vs">VS</div>
                                 <div class="match-player ${match.winner && match.winner.id === match.player2?.id ? 'winner' : match.winner ? 'loser' : ''}">
-                                    <span class="player-icon">${match.winner && match.winner.id === match.player2?.id ? '👑' : '🎮'}</span>
                                     <span class="player-name">${p2}</span>
                                 </div>
                             </div>
-                            ${!match.winner && isOrganizer && match.player1 && match.player2 ? `
+                            ${!match.winner && isOrganizer ? `
                                 <div class="match-actions">
                                     <button class="btn btn-success btn-sm" onclick="setMatchWinner(${round}, ${index}, '${match.player1.id}')">
                                         Victoire ${p1}
@@ -235,43 +243,51 @@ function setMatchWinner(round, matchIndex, winnerId) {
     const config = currentChallenge.tournamentConfig;
     round = parseInt(round);
 
-    // Récupérer le match courant dans ce round
     const matchesInRound = config.bracket.filter(m => m.round === round);
     const match = matchesInRound[matchIndex];
     if (!match) return;
 
-    // Déterminer le gagnant et s'assurer qu'il est un objet complet
     const winner = (match.player1 && match.player1.id === winnerId) ? match.player1 :
                    (match.player2 && match.player2.id === winnerId) ? match.player2 : null;
     if (!winner) return;
 
     match.winner = winner;
 
-    // ✅ AJOUT DES POINTS
+    // Ajouter les points
     const WIN_POINTS = 10;
-    currentChallenge.progressions[winner.name].score += 10;
+    if (!currentChallenge.progressions[winner.name]) currentChallenge.progressions[winner.name] = { score: 0 };
+    currentChallenge.progressions[winner.name].score += WIN_POINTS;
 
-    // Préparer le round suivant
-    const nextRound = round + 1;
-    const nextMatchIndex = Math.floor(matchIndex / 2);
+    // Vérifier s’il y a un round suivant
+    const winnersCurrentRound = matchesInRound.map(m => m.winner).filter(Boolean);
 
-    // Filtrer les matches déjà existants pour le round suivant
-    let nextRoundMatches = config.bracket.filter(m => m.round === nextRound);
-    let nextMatch = nextRoundMatches[nextMatchIndex];
-
-    // Si le match n'existe pas, le créer
-    if (!nextMatch) {
-        nextMatch = { player1: null, player2: null, winner: null, round: nextRound };
-        config.bracket.push(nextMatch);
+    if (winnersCurrentRound.length < 2) {
+        // 👑 Dernier match : plus de round suivant
+        ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
+        showNotification(`${winner.name} remporte le tournoi !`);
+        return;
     }
 
-    // Assigner le gagnant à player1 ou player2
-    if (!nextMatch.player1) nextMatch.player1 = { ...winner }; 
-    else if (!nextMatch.player2) nextMatch.player2 = { ...winner };
+    // Supprimer les matches existants du round suivant
+    const nextRound = round + 1;
+    config.bracket = config.bracket.filter(m => m.round <= round);
+
+    // Créer les matches du round suivant
+    for (let i = 0; i < winnersCurrentRound.length; i += 2) {
+        const player1 = winnersCurrentRound[i];
+        const player2 = winnersCurrentRound[i + 1] || null;
+        config.bracket.push({
+            player1,
+            player2,
+            winner: player2 ? null : player1, // passe automatiquement si seul
+            round: nextRound
+        });
+    }
 
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
     showNotification(`${winner.name} remporte le match !`);
 }
+
 
 // ========== COURSE ==========
 function renderRace() {

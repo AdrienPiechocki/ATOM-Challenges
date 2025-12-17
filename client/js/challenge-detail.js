@@ -39,12 +39,16 @@ function renderChallengeDetail() {
 
     // Informations
     document.getElementById('gameInfo').textContent = challenge.game;
-    document.getElementById('typeInfo').textContent = challenge.teamFormat || 'Solo';
     document.getElementById('formatInfo').textContent = getFormatText(challenge.format);
     document.getElementById('betInfo').textContent = `${challenge.minBet} - ${challenge.maxBet} points`;
     document.getElementById('organizerInfo').textContent = challenge.organizer;
     document.getElementById('statusInfo').innerHTML = getStatusBadge(challenge.status);
-
+    document.getElementById('teamInfo').textContent  = challenge.teamFormat === "team"
+                                                    ? challenge.teamConfig.minPlayersPerTeam == challenge.teamConfig.maxPlayersPerTeam
+                                                    ? `${challenge.teamConfig.minPlayersPerTeam} joueurs`
+                                                    : `${challenge.teamConfig.minPlayersPerTeam} à ${challenge.teamConfig.maxPlayersPerTeam} joueurs` 
+                                                    : '1 joueur';
+    
     // Règles
     const rulesSection = document.getElementById('rulesSection');
     rulesSection.innerHTML = challenge.rules
@@ -129,16 +133,6 @@ const MALUS_CONFIG = {
     rankingMultiplier: { top: 0.5, middle: 1, bottom: 1.3 }
 };
 
-function calculateMalus(cost, rank, totalPlayers) {
-    let penalty = Math.floor(Math.sqrt(cost) * 5);
-    const percentile = rank / totalPlayers;
-    let mult = MALUS_CONFIG.rankingMultiplier.middle;
-    if (percentile <= 0.33) mult = MALUS_CONFIG.rankingMultiplier.top;
-    else if (percentile >= 0.66) mult = MALUS_CONFIG.rankingMultiplier.bottom;
-    penalty = Math.floor(penalty * mult);
-    return Math.min(penalty, MALUS_CONFIG.maxPenalty);
-}
-
 function canUseMalus(challenge, username) {
     if (!challenge.malusCooldowns) challenge.malusCooldowns = {};
     const last = challenge.malusCooldowns[username];
@@ -178,32 +172,42 @@ function applyMalus() {
         showNotification('Montant invalide', 'error');
         return;
     }
+
+    // 🔒 Vérification points disponibles
     if (attacker.totalPoints < cost) {
         showNotification('Points insuffisants', 'error');
         return;
     }
 
-    const rankings = challenge.participants.map((p, i) => ({
-        username: p.username,
-        teamId: p.teamId,
-        rank: i + 1
-    }));
+    const penalty = Math.floor(Math.sqrt(cost) * 5)
 
-    const targetRank = rankings.find(r => r.username === malusTarget)?.rank || rankings.length;
-    const penalty = calculateMalus(cost, targetRank, rankings.length);
+    // Déduction des points de l'attaquant
     attacker.totalPoints -= cost;
+    const attackerParticipant = challenge.participants.find(p => p.username === currentUser);
+    if (attackerParticipant) {
+        if (attackerParticipant.type === 'team') {
+            attackerParticipant.usedPoints[currentUser] += cost;
+        } else {
+            attackerParticipant.usedPoints += cost;
+        }
+    }
 
+
+    // 🔄 Appliquer le malus
     const target = challenge.participants.find(p => p.username === malusTarget);
     if (!target) return;
 
-    if (target.team) {
-        const teamMembers = challenge.participants.filter(p => p.team === target.team);
-        const perPlayer = Math.ceil((penalty * MALUS_CONFIG.teamSplitRatio) / teamMembers.length);
+    if (target.type === 'team') {
+        const teamMembers = challenge.participants.filter(p => p.type === 'team' && p.teamId === target.teamId);
+        const perPlayer = Math.ceil((penalty * (MALUS_CONFIG.teamSplitRatio || 1)) / teamMembers.length);
+
+        // Appliquer le malus
         teamMembers.forEach(p => (p.modifier = (p.modifier || 0) - perPlayer));
     } else {
         target.modifier = (target.modifier || 0) - penalty;
     }
 
+    // 🔹 Journal du malus
     if (!challenge.malusLog) challenge.malusLog = [];
     challenge.malusLog.push({ from: currentUser, to: malusTarget, cost, penalty, timestamp: Date.now() });
     challenge.malusCooldowns[currentUser] = Date.now();
@@ -428,7 +432,7 @@ function leaveChallenge() {
     // ================== ÉQUIPE ==================
     if (teamParticipant) {
 
-        if (!isTeamLeader(currentUser, teamParticipant.teamId)) {
+        if (!isTeamLeader(currentUser, challenge)) {
             return showNotification('Seul le leader peut retirer l’équipe du défi', 'error');
         }
 
@@ -476,8 +480,8 @@ function refundAllBets(challenge) {
         // 👤 Joueur solo
         if (p.type === 'player') {
             const user = users.find(u => u.username === p.username);
-            if (user && p.originalPoints !== undefined) {
-                user.totalPoints = p.originalPoints; // Restaurer
+            if (user && p.usedPoints !== undefined) {
+                user.totalPoints += p.usedPoints; // Rembourser les points utilisés
             }
         }
 
@@ -485,13 +489,14 @@ function refundAllBets(challenge) {
         if (p.type === 'team') {
             p.members.forEach(username => {
                 const user = users.find(u => u.username === username);
-                if (user && p.originalPoints?.[username] !== undefined) {
-                    user.totalPoints = p.originalPoints[username]; // Restaurer
+                if (user && p.usedPoints?.[username] !== undefined) {
+                    user.totalPoints += p.usedPoints[username]; // Rembourser les points utilisés
                 }
             });
         }
     });
 }
+
 
 
 function deleteChallenge() {
@@ -571,16 +576,14 @@ function confirmJoin() {
     const challenge = challenges.find(c => String(c.id) === String(selectedChallengeForJoin));
     if (!challenge) return;
 
-    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1, originalPoints: 0 };
+    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1, usedPoints: 0 };
 
     if (challenge.teamFormat === "team") {
         const teamId = document.getElementById('teamSelect').value;
 
-        // On récupère l'équipe parmi toutes les équipes de l'utilisateur
         const team = teams.find(t => t.id === teamId && t.members.includes(currentUser));
         if (!team) return showNotification('Équipe invalide', 'error');
 
-        // Vérifier si l'utilisateur est le leader
         const isLeader = team.isLeader || team.members[0] === currentUser;
         if (!isLeader) return showNotification('Seul le leader peut inscrire l’équipe', 'error');
 
@@ -593,38 +596,45 @@ function confirmJoin() {
             modifier: 0,
             multiplier: 1,
             isLeader: true,
-            originalPoints: {} // Stocker points initiaux de chaque membre
+            usedPoints: {} // Stocker points initiaux
         };
-    } else {
-        // Stocker le total initial du joueur
-        const user = users.find(u => u.username === currentUser);
-        if(user) participant.originalPoints = user.totalPoints;
     }
 
     const betAmount = parseInt(document.getElementById('betAmount').value);
+
     if (isNaN(betAmount) || betAmount < challenge.minBet || betAmount > challenge.maxBet) {
         return showNotification('Mise invalide', 'error');
     }
     participant.bet = betAmount;
-
     if (challenge.password) {
         const pass = document.getElementById('joinPassword').value;
         if (pass !== challenge.password) return showNotification('Mot de passe incorrect', 'error');
     }
 
-    // Déduire les points du joueur ou de l'équipe et stocker les points initiaux
     if (participant.type === 'team') {
+        if (participant.members.length < challenge.teamConfig.minPlayersPerTeam) return showNotification("Pas assez de membres dans l'équipe", 'error');
+
+        for (const username of participant.members) {
+            const user = users.find(u => u.username === username);
+            if (!user || user.totalPoints < betAmount) {
+                return showNotification(`Le membre ${username} n'a pas assez de points pour miser`, 'error');
+            }
+        }
+        // Déduire les points et stocker les points initiaux
         participant.members.forEach(username => {
             const user = users.find(u => u.username === username);
-            if (user) {
-                if(!participant.originalPoints) participant.originalPoints = {};
-                participant.originalPoints[username] = user.totalPoints; // sauvegarde
+            if(user) {
+                participant.usedPoints[username] += betAmount;
                 user.totalPoints -= betAmount;
             }
         });
     } else {
         const user = users.find(u => u.username === currentUser);
-        if (user) user.totalPoints -= betAmount;
+        if (!user || user.totalPoints < betAmount) {
+            return showNotification(`Vous n'avez pas assez de points pour miser`, 'error');
+        }
+        participant.usedPoints += betAmount;
+        user.totalPoints -= betAmount;
     }
 
     challenge.participants.push(participant);
