@@ -284,12 +284,13 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
     const gameName = document.getElementById('gameName').value;
     const teamFormat = document.getElementById('teamFormat').value;
     const formatChallenge = document.getElementById('formatChallenge').value;
-    const formatMalus = document.getElementById('toggleBtn').checked;
+    const formatMalus = document.getElementById('toggleMalus').checked;
     const rulesChallenge = document.getElementById('rulesChallenge').value;
     const minPoints = parseInt(document.getElementById('minPoints').value);
     const maxPoints = parseInt(document.getElementById('maxPoints').value);
     const visibility = document.getElementById('visibility').value;
     const challengePassword = document.getElementById('challengePassword').value;
+    const allowCheaters = document.getElementById('toggleCheaters').checked;
     
     if(minPoints > maxPoints) {
         showNotification('La mise minimum ne peut pas être supérieure à la mise maximum', 'error');
@@ -308,6 +309,7 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         maxBet: maxPoints,
         visibility: visibility,
         password: visibility === 'password' ? challengePassword : null,
+        cheatersAllowed: allowCheaters,
         organizer: currentUser,
         participants: [],
         progressions: {},

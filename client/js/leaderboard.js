@@ -4,7 +4,7 @@ function updatePageData() {
 
 function renderLeaderboard() {
     const sortedUsers = [...users].sort((a, b) => b.totalPoints - a.totalPoints);
-    const nonCheaters = sortedUsers.filter(r => r.cheated.length == 0);
+    const nonCheaters = sortedUsers.filter(r => r.cheated.length < 3);
     // Podium
     if(nonCheaters.length >= 1) {
         const place1 = document.getElementById('place1');

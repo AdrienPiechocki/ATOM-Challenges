@@ -78,7 +78,7 @@ function renderChallenges() {
     
     list.innerHTML = filtered.map(challenge => {
         const currentUserData = users.find(u => u.username === currentUser);
-        const userTeams = teams.filter(t => t.members.some(m => m.username === currentUser));
+        const currentOrganizerData = users.find(u => u.username === challenge.organizer);
         
         // Vérifier si l'utilisateur ou son équipe participe
         let isParticipant = false;
@@ -98,8 +98,8 @@ function renderChallenges() {
             participantType = 'player';
         }
         
-        const canJoin = !isParticipant && challenge.status === 'waiting';
-        
+        const canJoin = !isParticipant && challenge.status === 'waiting' && ((!challenge.cheatersAllowed && currentUserData.cheated.length < 3) || challenge.organizer === currentUser);
+
         return `
             <div class="challenge-card">
                 <div onclick="window.location.href='challenge-detail.html?id=${challenge.id}'">
@@ -112,7 +112,7 @@ function renderChallenges() {
                         <span class="badge">Mise: ${challenge.minBet}-${challenge.maxBet} pts</span>
                     </div>
                     <p style="margin-top: 0.5rem; color: var(--gray);">
-                        ${challenge.participants ? challenge.participants.length : 0} participant(s) • Organisé par ${challenge.organizer}
+                        ${challenge.participants ? challenge.participants.length : 0} participant(s) • Organisé par ${challenge.organizer} ${currentOrganizerData.cheated.length >= 3 ? '⚠️' : ''}
                     </p>
                 </div>
                 <div class="challenge-actions">

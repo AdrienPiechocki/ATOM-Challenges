@@ -19,6 +19,7 @@ function updatePageData() {
 // -------------------- RENDER CHALLENGE DETAIL --------------------
 function renderChallengeDetail() {
     const challenge = challenges.find(c => c.id === currentChallengeId);
+    const currentOrganizerData = users.find(u => u.username === challenge.organizer);
     if (!challenge) {
         setTimeout(() => window.location.href = 'challenges.html', 2000);
         return;
@@ -41,7 +42,7 @@ function renderChallengeDetail() {
     document.getElementById('gameInfo').textContent = challenge.game;
     document.getElementById('formatInfo').textContent = getFormatText(challenge.format);
     document.getElementById('betInfo').textContent = `${challenge.minBet} - ${challenge.maxBet} points`;
-    document.getElementById('organizerInfo').textContent = challenge.organizer;
+    document.getElementById('organizerInfo').textContent = `${challenge.organizer} ${currentOrganizerData.cheated.length >= 3 ? '⚠️' : ''}`;
     document.getElementById('statusInfo').innerHTML = getStatusBadge(challenge.status);
     document.getElementById('teamInfo').textContent  = challenge.teamFormat === "team"
                                                     ? challenge.teamConfig.minPlayersPerTeam == challenge.teamConfig.maxPlayersPerTeam
@@ -641,6 +642,12 @@ function deleteChallenge() {
 function openJoinModal(challengeId) {
     const challenge = challenges.find(c => c.id === challengeId);
     if (!challenge) return;
+    
+    const currentUserData = users.find(u => u.username === currentUser);
+    if (challenge.organizer != currentUserData.username && !challenge.cheatersAllowed && currentUserData.cheated.length >= 3) {
+        showNotification('Les utilisateurs suspects ne sont pas le bienvenue dans ce défi', 'error');
+        return;
+    }
 
     selectedChallengeForJoin = challengeId;
     document.getElementById('joinChallengeName').textContent = challenge.name;
