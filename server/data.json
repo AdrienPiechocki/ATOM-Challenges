@@ -1,5 +1,42 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "_n9ifcq0w3",
+      "username": "Azimiro",
+      "passwordHash": "$2a$10$FtX4eFcte8azd1A5qa2Fouu8PDTDaD14z3JiuRoeehYjROueLZ9Jq",
+      "totalPoints": 0,
+      "friends": [],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "challengesCompleted": 7,
+      "cheated": []
+    },
+    {
+      "id": "_4qo414oke",
+      "username": "Khbgbgk",
+      "passwordHash": "$2a$10$vOFj0bpzSm2hwicw8IAuXuXYKGRzB1du.fcOrqb/EckqXjlVbjU5i",
+      "totalPoints": 200,
+      "friends": [],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "challengesCompleted": 7,
+      "cheated": []
+    },
+    {
+      "id": "_0gv2yegg3",
+      "username": "RedScipio",
+      "passwordHash": "$2a$10$10GJ0zCKpFuqyTID84GQ8.D.QtU/IJzb5Z9m9MK6kIPK/V4Ub6QBS",
+      "totalPoints": 100,
+      "friends": [],
+      "friendRequests": [],
+      "sentRequests": [],
+      "cosmetics": [],
+      "challengesCompleted": 0,
+      "cheated": []
+    }
+  ],
   "challenges": [],
   "messages": {},
   "teams": []

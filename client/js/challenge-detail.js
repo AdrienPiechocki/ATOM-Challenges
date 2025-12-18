@@ -77,12 +77,21 @@ function renderChallengeDetail() {
                 <div class="participant-bet">
                     Mise: ${p.bet} pts
                     ${p.modifier !== 0 ? `<br>Bonus/Malus: ${p.modifier > 0 ? '+' : ''}${p.modifier}` : ''}
-                    ${p.multiplier !== 1 ? `<br>Multiplicateur: x${p.multiplier}` : ''}
                     ${progress ? `<br>Score: ${progress.score}` : ''}
                 </div>
                 ${
                     p.type === 'team'
                         ? `<div id="teamMembers-${p.teamId}" class="team-members" style="display:none; margin-top:0.5rem; padding-left:1rem;"></div>`
+                        : ''
+                }
+                ${
+                    isOrganizer && !isCheater && challenge.status === 'active' && ((p.type === 'player' && p.username !== currentUser) || p.type === 'team' && !p.members.includes(currentUser))
+                        ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); addCheater('${p.username}')" style="margin-top: 0.5rem;">⚠️ Signaler</button>`
+                        : ''
+                }
+                ${
+                    isOrganizer && isCheater && challenge.status === 'active' && ((p.type === 'player' && p.username !== currentUser) || p.type === 'team' && !p.members.includes(currentUser))
+                        ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); removeCheater('${p.username}')" style="margin-top: 0.5rem;">😇 Gracier</button>`
                         : ''
                 }
                 ${
@@ -225,6 +234,84 @@ function closeMalusModal() {
     malusTarget = null;
 }
 
+// -------------------- CHEAT --------------------
+
+function addCheater(username) {
+    const challenge = challenges.find(c => c.id === currentChallengeId);
+    const user = users.find(u => u.username === currentUser);
+    if (!challenge || !user) return;
+
+    const target = challenge.participants.find(p => p.username === username);
+    if (!target) return;
+
+    if (target.type === 'team') {
+        openCheatModal(target.teamId)
+    } else {
+        users.forEach(u => {
+            if (u.username === username) {
+                u.cheated.push(currentChallengeId);
+                challenge.progressions[u.username].cheated = true;
+            }
+        });
+    }
+    ws.send(JSON.stringify({ type: 'updateUsers', users }));
+    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
+    showNotification(`Utilisateur signalé`);
+    renderChallengeDetail();
+}
+
+function removeCheater(username) {
+    const challenge = challenges.find(c => c.id === currentChallengeId);
+    const user = users.find(u => u.username === currentUser);
+    if (!challenge || !user) return;
+
+    const target = challenge.participants.find(p => p.username === username);
+    if (!target) return;
+
+    if (target.type === 'team') {
+        openCheatModal(target.teamId)
+    } else {
+        users.forEach(u => {
+            if (u.username === username) {
+                u.cheated.splice(u.cheated.indexOf(currentChallengeId));
+                challenge.progressions[u.username].cheated = false;
+            }
+        })
+    }
+    ws.send(JSON.stringify({ type: 'updateUsers', users }));
+    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
+    showNotification(`Utilisateur gracié`);
+    renderChallengeDetail();
+}
+
+function openCheatModal(teamId) {
+    const challenge = challenges.find(c => c.id === currentChallengeId);
+    const user = users.find(u => u.username === currentUser);
+    if (!challenge || !user) return;
+
+    const teamParticipant = challenge.participants.find((p) => p.type === 'team' && p.teamId === teamId);
+    document.getElementById('teamUsers').innerHTML = teamParticipant.members
+            .map((username) => {
+                `<div class="team-member">- ${username}</div>
+                ${
+                    !username.cheated
+                        ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); addCheater('${username}')" style="margin-top: 0.5rem;">⚠️ Signaler</button>`
+                        : ''
+                }
+                ${
+                    username.cheated
+                        ? `<button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); removeCheater('${username}')" style="margin-top: 0.5rem;">😇 Gracier</button>`
+                        : ''
+                }`
+            }).join('');
+
+    document.getElementById('cheatModal').classList.remove('hidden');
+}
+
+function closeCheatModal() {
+    document.getElementById('cheatModal').classList.add('hidden');
+}
+
 // -------------------- CHAT --------------------
 function updateChat() {
     const chatMessages = document.getElementById('chatMessages');
@@ -321,7 +408,7 @@ function startChallenge() {
     if (!challenge.progressions) challenge.progressions = {};
     challenge.participants.forEach(p => {
         if (!challenge.progressions[p.username || p.teamId]) {
-            challenge.progressions[p.username || p.teamId] = { submissions: [], score: 0, validated: 0, rejected: 0, cheated: false };
+            challenge.progressions[p.username || p.teamId] = { score: 0, cheated: false };
         }
     });
 
@@ -340,7 +427,7 @@ function finishChallenge() {
 
     const results = challenge.participants.map(p => {
         const progress = challenge.progressions[p.username || p.teamId] || { score: 0, cheated: false };
-        const finalScore = (progress.score * (p.multiplier || 1)) + (p.modifier || 0);
+        const finalScore = progress.score + (p.modifier || 0);
 
         // Utiliser le nom stocké directement
         const displayName = p.type === 'team' ? p.teamName || `#${p.teamId}` : p.username;
@@ -603,7 +690,7 @@ function confirmJoin() {
     const challenge = challenges.find(c => String(c.id) === String(selectedChallengeForJoin));
     if (!challenge) return;
 
-    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1, usedPoints: 0 };
+    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, usedPoints: 0 };
 
     if (challenge.teamFormat === "team") {
         const teamId = document.getElementById('teamSelect').value;
@@ -621,7 +708,6 @@ function confirmJoin() {
             members: team.members,
             bet: 0,
             modifier: 0,
-            multiplier: 1,
             isLeader: true,
             usedPoints: Object.fromEntries(
                 team.members.map(u => [u, 0])

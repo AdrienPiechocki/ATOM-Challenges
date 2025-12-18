@@ -45,7 +45,7 @@ router.post('/register', async (req, res) => {
         sentRequests: [],
         cosmetics: [],
         challengesCompleted: 0,
-        cheated: false
+        cheated: []
     };
     
     data.users.push(newUser);

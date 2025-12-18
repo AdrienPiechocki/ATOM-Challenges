@@ -178,7 +178,7 @@ function confirmJoin() {
     const challenge = challenges.find(c => String(c.id) === String(selectedChallengeForJoin));
     if (!challenge) return;
 
-    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0, multiplier: 1 };
+    let participant = { username: currentUser, type: 'player', bet: 0, modifier: 0 };
 
     if (challenge.teamFormat === "team") {
         const teamId = document.getElementById('teamSelect').value;
@@ -198,7 +198,6 @@ function confirmJoin() {
             members: team.members,
             bet: 0,
             modifier: 0,
-            multiplier: 1,
             isLeader: true // Marquer le leader
         };
     }
