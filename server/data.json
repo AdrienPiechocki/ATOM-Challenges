@@ -1,30 +1,5 @@
 {
-  "users": [
-    {
-      "id": "_s3fuprwls",
-      "username": "Azimiro",
-      "passwordHash": "$2a$10$v3Kbm.SZlyZCkMTTbvufv..Lan3BIkZwAxoqrX4sldjydUbggf0.a",
-      "totalPoints": 100,
-      "friends": [],
-      "friendRequests": [],
-      "sentRequests": [],
-      "cosmetics": [],
-      "challengesCompleted": 1,
-      "cheated": false
-    },
-    {
-      "id": "_ckhdjoywd",
-      "username": "Khbgbgk",
-      "passwordHash": "$2a$10$G3pbiw1Jzg6DLfMxxSvfYOxJWqNYDG6ibZ79urtTu4ZhvxGIHbk2e",
-      "totalPoints": 100,
-      "friends": [],
-      "friendRequests": [],
-      "sentRequests": [],
-      "cosmetics": [],
-      "challengesCompleted": 1,
-      "cheated": false
-    }
-  ],
+  "users": [],
   "challenges": [],
   "messages": {},
   "teams": []
