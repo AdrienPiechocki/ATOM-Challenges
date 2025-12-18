@@ -44,6 +44,7 @@ router.post('/register', async (req, res) => {
         friendRequests: [],
         sentRequests: [],
         cosmetics: [],
+        challengesCompleted: 0,
         cheated: false
     };
     

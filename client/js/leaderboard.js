@@ -32,17 +32,13 @@ function renderLeaderboard() {
         return;
     }
     
-    tbody.innerHTML = sortedUsers.map((user, index) => {
-        const userChallenges = challenges.filter(c => 
-            c.participants.some(p => p.username === user.username)
-        ).length;
-        
+    tbody.innerHTML = sortedUsers.map((user, index) => {        
         return `
             <tr ${user.username === currentUser ? 'style="background: var(--light); font-weight: 600;"' : ''}>
                 <td class="rank-cell">#${index + 1}</td>
                 <td>${user.username}${user.cheated ? ' ⚠️' : ''}${user.username === currentUser ? ' (Vous)' : ''}</td>
                 <td style="font-weight: bold; color: var(--warning);">${user.totalPoints} pts</td>
-                <td>${userChallenges}</td>
+                <td>${user.challengesCompleted}</td>
             </tr>
         `;
     }).join('');

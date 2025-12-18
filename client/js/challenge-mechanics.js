@@ -367,53 +367,49 @@ function renderRace() {
        CALCUL DES SCORES
     ========================= */
 
-    const participantTotals = currentChallenge.participants.map(p => {
-        const id = p.type === 'team' ? p.teamId : p.username;
-        const times = config.times?.[id] || {};
+    if (!currentChallenge.progressions) currentChallenge.progressions = {};
 
-        let rawTotal = 0;        // ⏱️ vrai temps
-        let weightedTotal = 0;   // 🧮 score
+    const participantTotals = currentChallenge.participants
+        .map(p => {
+            const id = p.type === 'team' ? p.teamId : p.username;
+            const times = config.times?.[id] || {};
 
-        config.steps.forEach(step => {
-            const t = times[step.id];
-            if (typeof t === 'number') {
-                rawTotal += t;
-                weightedTotal += t * (step.coef ?? 1);
-            }
-        });
+            let rawTotal = 0;
+            let weightedTotal = 0;
 
-        return {
-            id,
-            name: p.type === 'team' ? p.teamName : p.username,
-            rawTotal,
-            weightedTotal
-        };
-    }).filter(p => p.rawTotal > 0);
+            config.steps.forEach(step => {
+                const t = times[step.id];
+                if (typeof t === 'number') {
+                    rawTotal += t;
+                    weightedTotal += t * (step.coef ?? 1);
+                }
+            });
 
-    
-    participantTotals.sort((a, b) => a.rawTotal - b.rawTotal);
+            return {
+                id,
+                name: p.type === 'team' ? p.teamName : p.username,
+                rawTotal,
+                weightedTotal
+            };
+        })
+        .filter(p => p.rawTotal > 0)
+        .sort((a, b) => a.rawTotal - b.rawTotal);
 
-    if (!currentChallenge.progressions) {
-        currentChallenge.progressions = {};
+    if (participantTotals.length === 0) {
+        document.getElementById('raceRankings').innerHTML = `
+            <div class="info-card"><p>Aucun temps renseigné</p></div>
+        `;
+        return;
     }
 
-    const bestWeightedTime = participantTotals[0]?.weightedTotal ?? 0;
+    const bestTime = participantTotals[0].weightedTotal;
 
-    participantTotals.forEach((p, index) => {
-        const delta = p.weightedTotal - bestWeightedTime;
-        const score = Math.max(0, Math.round(1000 - delta / 10));
-
-        // 🧱 Init progression si absente
-        if (!currentChallenge.progressions[p.id]) {
-            currentChallenge.progressions[p.id] = {};
-        }
-
-        // 💾 Sauvegarde du score
+    participantTotals.forEach(p => {
+        const delta = p.weightedTotal - bestTime;
+        const score = Math.max(0, Math.round(1000 - delta / 10)/10);
         currentChallenge.progressions[p.id].score = score;
     });
-
-    const bestTime = participantTotals[0]?.weightedTotal ?? 0;
-
+    
     /* =========================
        CLASSEMENT
     ========================= */
@@ -444,8 +440,7 @@ function renderRace() {
                 <tbody>
                     ${participantTotals.map((p, index) => {
                         const delta = p.weightedTotal - bestTime;
-                        const score = Math.max(0, Math.round(1000 - delta / 10));
-                        
+                        const score = Math.max(0, Math.round(1000 - delta / 10)/10);
                         const medal =
                             index === 0 ? '🥇' :
                             index === 1 ? '🥈' :
@@ -510,11 +505,11 @@ function updateRaceStepTime(stepId, input) {
 
     // 💾 Sauvegarde
     config.times[participantId][stepId] = totalMs;
-    
-    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
 
     // 🔄 Rafraîchir affichage / classement
     renderRace();
+
+    ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
 }
 
 function formatTime(ms) {

@@ -64,7 +64,7 @@ function renderChallengeDetail() {
             const isCheater = progress?.cheated || false;
             const displayName = p.type === 'team' ? p.teamName : p.username;
             const isOrganizerParticipant = p.username === challenge.organizer;
-
+            
             return `
             <div class="participant-card ${isOrganizerParticipant ? 'organizer' : ''} ${
                 isCheater ? 'cheated' : ''
@@ -86,7 +86,7 @@ function renderChallengeDetail() {
                         : ''
                 }
                 ${
-                    isParticipant && p.type === 'player' && p.username !== currentUser && challenge.status === 'active'
+                    isParticipant && challenge.malus && challenge.status === 'active' && ((p.type === 'player' && p.username !== currentUser) || p.type === 'team' && !p.members.includes(currentUser))
                         ? `<button class="btn btn-warning btn-sm" onclick="event.stopPropagation(); openMalusModal('${p.username}')" style="margin-top: 0.5rem;">⚡ Malus</button>`
                         : ''
                 }
@@ -333,7 +333,7 @@ function startChallenge() {
 
 // -------------------- FINISH CHALLENGE --------------------
 function finishChallenge() {
-    if (!confirm('Êtes-vous sûr de vouloir terminer ce défi ?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir terminer ce défi ? Les remboursements en cas de suppression ne seront plus effectifs')) return;
 
     const challenge = challenges.find(c => c.id === currentChallengeId);
     if (!challenge || challenge.organizer !== currentUser) return;
@@ -363,6 +363,23 @@ function finishChallenge() {
         const winnerUser = users.find(u => u.username === winner.username);
         if (winnerUser) winnerUser.totalPoints += totalPot;
 
+        challenge.participants.forEach(p => {
+            if (p.type === 'team') {
+                p.members.forEach(username => {
+                    const user = users.find(u => u.username === username);
+                    if (user) {
+                        user.challengesCompleted += 1;
+                    }
+                });
+            } else {
+                const user = users.find(u => u.username === p.username);
+                if (user) {
+                    user.challengesCompleted += 1;
+                }
+            }
+        });
+
+
         challenge.results = { winner: winner.displayName, totalPot, rankings: results, finishedAt: Date.now() };
         challenge.status = 'finished';
 
@@ -376,11 +393,17 @@ function finishChallenge() {
             if (p.type === 'team') {
                 p.members.forEach(username => {
                     const user = users.find(u => u.username === username);
-                    if (user) user.totalPoints += p.bet;
+                    if (user) {
+                        user.totalPoints += p.bet;
+                        user.challengesCompleted += 1;
+                    }
                 });
             } else {
                 const user = users.find(u => u.username === p.username);
-                if (user) user.totalPoints += p.bet;
+                if (user) {
+                    user.totalPoints += p.bet;
+                    user.challengesCompleted += 1;
+                }
             }
         });
 
@@ -489,7 +512,8 @@ function refundAllBets(challenge) {
         if (p.type === 'team') {
             p.members.forEach(username => {
                 const user = users.find(u => u.username === username);
-                if (user && p.usedPoints?.[username] !== undefined) {
+                if (user && p.usedPoints[username] !== undefined) {
+                    console.log(p.usedPoints[username])
                     user.totalPoints += p.usedPoints[username]; // Rembourser les points utilisés
                 }
             });
@@ -507,17 +531,20 @@ function deleteChallenge() {
 
     const challenge = challenges[index];
 
-    // 🔄 Remboursement des mises
-    if (challenge.participants && challenge.participants.length > 0) {
-        refundAllBets(challenge)
-        ws.send(JSON.stringify({ type: 'updateUsers', users }));
-    }
-
     // 🗑️ Suppression du défi
     challenges.splice(index, 1);
     ws.send(JSON.stringify({ type: 'updateChallenges', challenges }));
 
-    showNotification('Défi supprimé et mises remboursées');
+    if (challenge.status === "finished") {
+        showNotification('Défi supprimé');
+    }else {
+        showNotification('Défi supprimé et mises remboursées');
+        // 🔄 Remboursement des mises
+        if (challenge.participants && challenge.participants.length > 0) {
+            refundAllBets(challenge)
+            ws.send(JSON.stringify({ type: 'updateUsers', users }));
+        }
+    }    
 
     setTimeout(() => window.location.href = 'challenges.html', 800);
 }

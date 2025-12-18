@@ -284,6 +284,7 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
     const gameName = document.getElementById('gameName').value;
     const teamFormat = document.getElementById('teamFormat').value;
     const formatChallenge = document.getElementById('formatChallenge').value;
+    const formatMalus = document.getElementById('toggleBtn').checked;
     const rulesChallenge = document.getElementById('rulesChallenge').value;
     const minPoints = parseInt(document.getElementById('minPoints').value);
     const maxPoints = parseInt(document.getElementById('maxPoints').value);
@@ -301,6 +302,7 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
         game: gameName,
         teamFormat: teamFormat,
         format: formatChallenge,
+        malus: formatMalus,
         rules: rulesChallenge,
         minBet: minPoints,
         maxBet: maxPoints,
@@ -337,6 +339,14 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
             currentPhase: 'waiting'
         };
     } else if(formatChallenge === 'course') {
+        if(runSteps.length === 0) {
+            showNotification('Veuillez ajouter au moins une étape pour la course', 'error');
+            return;
+        }
+        if(runSteps.some(o => !o.name.trim())) {
+            showNotification('Toutes les étapes doivent avoir un nom', 'error');
+            return;
+        }
         newChallenge.raceConfig = {
             steps: runSteps.map(o => ({...o})),
             times: {},
