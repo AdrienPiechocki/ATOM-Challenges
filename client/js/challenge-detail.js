@@ -596,7 +596,9 @@ function confirmJoin() {
             modifier: 0,
             multiplier: 1,
             isLeader: true,
-            usedPoints: {} // Stocker points initiaux
+            usedPoints: Object.fromEntries(
+                team.members.map(u => [u, 0])
+            )
         };
     }
 
