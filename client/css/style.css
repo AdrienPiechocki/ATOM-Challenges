@@ -11,10 +11,12 @@
   --light: #f8fafc;
   --gray: #64748b;
   --border: #e2e8f0;
-  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow: #0000001a;
   --bg: #f1f5f9;
   --card-bg: #ffffff;
   --text: #1e293b;
+  --background-gradient-a: #667eea;
+  --background-gradient-b: #764ba2;
 }
 
 * {
@@ -25,7 +27,7 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--background-gradient-a) 0%, var(--background-gradient-b) 100%);
   min-height: 100vh;
   color: var(--dark);
 }
@@ -49,21 +51,21 @@ body {
 }
 
 .logo h1 {
-  color: white;
+  color: var(--light);
   font-size: 3rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 2px 2px 4px var(--shadow);
   margin-bottom: 0.5rem;
 }
 
 .tagline {
-  color: rgba(255,255,255,0.9);
+  color: var(--light);
   font-size: 1.1rem;
 }
 
 .auth-box {
-  background: white;
+  background: var(--light);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  box-shadow: 0 20px 60px var(--shadow);
   overflow: hidden;
 }
 
@@ -85,7 +87,7 @@ body {
 }
 
 .tab-btn.active {
-  background: white;
+  background: var(--light);
   color: var(--primary);
   border-bottom: 3px solid var(--primary);
 }
@@ -107,7 +109,7 @@ body {
 
 /* Navbar */
 .navbar {
-  background: white;
+  background: var(--light);
   box-shadow: 0 2px 8px var(--shadow);
   position: sticky;
   top: 0;
@@ -150,7 +152,7 @@ body {
 
 .nav-link.active {
   background: var(--primary);
-  color: white;
+  color: var(--light);
 }
 
 .nav-user {
@@ -231,7 +233,7 @@ body {
 
 .btn-primary {
   background: var(--primary);
-  color: white;
+  color: var(--light);
 }
 
 .btn-primary:hover {
@@ -242,16 +244,16 @@ body {
 
 .btn-secondary {
   background: var(--gray);
-  color: white;
+  color: var(--light);
 }
 
 .btn-secondary:hover {
-  background: #475569;
+  background: var(--gray);
 }
 
 .btn-success {
   background: var(--success);
-  color: white;
+  color: var(--light);
 }
 
 .btn-success:hover {
@@ -260,20 +262,20 @@ body {
 
 .btn-danger {
   background: var(--danger);
-  color: white;
+  color: var(--light);
 }
 
 .btn-danger:hover {
-  background: #dc2626;
+  background: var(--danger);
 }
 
 .btn-warning {
   background: var(--warning);
-  color: white;
+  color: var(--light);
 }
 
 .btn-warning:hover {
-  background: #d97706;
+  background: var(--warning);
 }
 
 .btn-sm {
@@ -287,7 +289,7 @@ body {
 }
 
 .dashboard-header h2 {
-  color: white;
+  color: var(--light);
   font-size: 2rem;
   margin-bottom: 1.5rem;
 }
@@ -299,7 +301,7 @@ body {
 }
 
 .stat-card {
-  background: white;
+  background: var(--light);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
@@ -334,7 +336,7 @@ body {
 }
 
 .section {
-  background: white;
+  background: var(--light);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
@@ -357,7 +359,7 @@ body {
 }
 
 .page-header h2 {
-  color: white;
+  color: var(--light);
   font-size: 2rem;
 }
 
@@ -369,9 +371,9 @@ body {
 
 .filter-select {
   padding: 0.5rem 1rem;
-  border: 2px solid white;
+  border: 2px solid --light;
   border-radius: 8px;
-  background: white;
+  background: var(--light);
   font-size: 0.875rem;
   cursor: pointer;
 }
@@ -389,7 +391,7 @@ body {
 }
 
 .challenge-card {
-  background: white;
+  background: var(--light);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
@@ -421,7 +423,7 @@ body {
   font-size: 0.75rem;
   font-weight: 600;
   background: var(--primary);
-  color: white;
+  color: var(--light);
 }
 
 .badge.type {
@@ -451,7 +453,7 @@ body {
 }
 
 .empty-state {
-  background-color: white;
+  background-color: var(--light);
   text-align: center;
   color: var(--gray);
   padding: 2rem;
@@ -460,7 +462,7 @@ body {
 
 /* Create Challenge */
 .create-form-container {
-  background: white;
+  background: var(--light);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
@@ -519,7 +521,7 @@ body {
 
 /* Challenge Detail */
 .challenge-detail {
-  background: white;
+  background: var(--light);
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
   overflow: hidden;
@@ -528,7 +530,7 @@ body {
 .detail-header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   padding: 2rem;
-  color: white;
+  color: var(--light);
 }
 
 .detail-header h2 {
@@ -618,17 +620,17 @@ body {
 
 .participant-card:hover {
   border-color: var(--primary);
-  background: white;
+  background: var(--light);
 }
 
 .participant-card.organizer {
   border-color: var(--warning);
-  background: #fef3c7;
+  background: var(--light);
 }
 
 .participant-card.cheated {
   border-color: var(--danger);
-  background: #fee;
+  background: var(--light);
 }
 
 .participant-name {
@@ -668,10 +670,10 @@ body {
 
 /* Chat */
 .chat {
-  background: white;
+  background: var(--light);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 6px var(--shadow);
   max-height: 600px;
   display: flex;
   flex-direction: column;
@@ -724,7 +726,7 @@ body {
 .chat-message {
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: white;
+  background: var(--light);
   border-radius: 8px;
   border-left: 3px solid var(--primary);
 }
@@ -768,7 +770,7 @@ body {
 .chat-input-container button {
   padding: 10px 20px;
   background: var(--primary);
-  color: white;
+  color: var(--light);
   border: none;
   border-radius: 8px;
   font-weight: 600;
@@ -783,7 +785,7 @@ body {
 
 /* Leaderboard */
 .leaderboard-container {
-  background: white;
+  background: var(--light);
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
   padding: 2rem;
@@ -932,7 +934,7 @@ body {
 
 .friend-card:hover {
   border-color: var(--primary);
-  background: white;
+  background: var(--light);
 }
 
 .friend-info {
@@ -970,7 +972,7 @@ body {
 }
 
 .team-card {
-  background: white;
+  background: var(--light);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px var(--shadow);
@@ -999,7 +1001,7 @@ body {
 
 .team-tag {
   background: var(--secondary);
-  color: white;
+  color: var(--light);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.875rem;
@@ -1031,7 +1033,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: var(--shadow);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1043,10 +1045,10 @@ body {
 }
 
 .modal-content {
-  background: white;
+  background: var(--light);
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px var(--shadow);
   max-width: 500px;
   width: 90%;
   position: relative;
@@ -1085,10 +1087,10 @@ body {
   top: 20px;
   right: 20px;
   background: var(--success);
-  color: white;
+  color: var(--light);
   padding: 1rem 1.5rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px var(--shadow);
   z-index: 2000;
   animation: slideIn 0.3s ease-out;
 }
@@ -1179,7 +1181,7 @@ body {
     background: var(--card-bg);
     border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px var(--shadow);
 }
 
 .section-header {
@@ -1199,7 +1201,7 @@ body {
     border-radius: 8px;
     padding: 1.5rem;
     text-align: center;
-    color: white;
+    color: var(--light);
 }
 
 .info-card p {
@@ -1223,7 +1225,7 @@ body {
 
 .group-header {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
+    color: var(--light);
     padding: 1rem;
     display: flex;
     justify-content: space-between;
@@ -1264,7 +1266,7 @@ body {
 
 .standing-row.first-place {
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: white;
+    color: var(--light);
     font-weight: 600;
 }
 
@@ -1272,7 +1274,7 @@ body {
     width: 30px;
     height: 30px;
     background: var(--primary);
-    color: white;
+    color: var(--light);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1371,8 +1373,8 @@ body {
 }
 
 .match-player.winner {
-    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
+    color: var(--light);
     font-weight: 600;
     transform: scale(1.02);
 }
@@ -1404,11 +1406,11 @@ body {
     padding: 3rem 2rem;
     background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
     border-radius: 12px;
-    color: white;
+    color: var(--light);
 }
 
 .timer-display.finished {
-    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--success) 0%, var(--success) 100%);
 }
 
 .timer-icon {
@@ -1426,7 +1428,7 @@ body {
     font-weight: 700;
     font-family: 'Courier New', monospace;
     margin: 1.5rem 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 4px var(--shadow);
 }
 
 .pulse-animation {
@@ -1456,7 +1458,7 @@ body {
 
 .rankings-table thead {
     background: var(--primary);
-    color: white;
+    color: var(--light);
 }
 
 .rankings-table th,
@@ -1475,7 +1477,7 @@ body {
 }
 
 .rankings-table tbody tr.podium-row {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--shadow) 0%, transparent 100%);
     font-weight: 600;
 }
 
@@ -1530,7 +1532,7 @@ body {
 
 .objective-points {
     background: var(--primary);
-    color: white;
+    color: var(--light);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-weight: 600;
@@ -1539,7 +1541,7 @@ body {
 
 .objective-badge {
     background: var(--warning);
-    color: white;
+    color: var(--light);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.85rem;
@@ -1551,7 +1553,7 @@ body {
 
 .objective-count {
     background: var(--success);
-    color: white;
+    color: var(--light);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-weight: 600;
@@ -1575,7 +1577,7 @@ body {
 
 .progress-table thead {
     background: var(--primary);
-    color: white;
+    color: var(--light);
 }
 
 .progress-table th,
@@ -1594,7 +1596,7 @@ body {
 }
 
 .progress-table tbody tr.podium-row {
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--shadow) 0%, transparent 100%);
 }
 
 /* Bingo */
@@ -1628,7 +1630,7 @@ body {
 
 .bingo-cell.completed {
     background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-    color: white;
+    color: var(--light);
     border-color: var(--success);
 }
 
@@ -1643,7 +1645,7 @@ body {
     position: absolute;
     top: 5px;
     right: 5px;
-    background: white;
+    background: var(--light);
     color: var(--success);
     width: 24px;
     height: 24px;
@@ -1662,7 +1664,7 @@ body {
 
 .bingo-badge {
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: white;
+    color: var(--light);
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-weight: 600;
@@ -1729,7 +1731,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: var(--border);
     transition: 0.3s;
     border-radius: 34px;
 }
@@ -1741,13 +1743,13 @@ body {
     width: 26px;
     left: 4px;
     bottom: 4px;
-    background-color: white;
+    background-color: var(--light);
     transition: 0.3s;
     border-radius: 50%;
 }
 
 input:checked + .slider {
-    background-color: #4CAF50;
+    background-color: var(--success);
 }
 
 input:checked + .slider:before {

@@ -11,6 +11,24 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(authRouter);
 
+app.get('/palette', (req, res) => {
+  res.json(data.server.palette);
+});
+
+app.get('/server-info', (req, res) => {
+    if (!data.server) {
+        return res.status(404).json({ error: 'Server info introuvable' });
+    }
+
+    res.json({
+        title: data.server.title,
+        subtitle: data.server.subtitle, 
+        points: data.server.points,
+        pointsIcon: data.server.points_icon
+    });
+});
+
+
 app.listen(port, () => console.log(`Server HTTP: http://localhost:${port}`));
 
 const wss = new WebSocket.Server({ port: 8080 });
@@ -24,7 +42,7 @@ wss.on('connection', ws => {
         challenges: data.challenges, 
         messages: data.messages, 
         users: data.users,
-        teams: data.teams || []
+        teams: data.teams
     }));
 
     ws.on('message', message => {
