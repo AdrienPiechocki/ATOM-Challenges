@@ -571,7 +571,7 @@ function renderMarathon() {
                         </div>
                         ${isParticipant && currentChallenge.status === 'active' ? `
                             <div class="objective-buttons" style="display:flex; gap:0.25rem; margin-top:0.25rem;">
-                                <button class="btn btn-sm btn-success" onclick="changeObjectiveCount('${obj.id}', 1)">+</button>
+                                <button class="btn btn-sm btn-success" onclick="changeObjectiveCount('${obj.id}', 1)" ${completionCount > 0 && !obj.repeatable ? 'disabled' : ''}>+</button>
                                 <button class="btn btn-sm btn-danger" onclick="changeObjectiveCount('${obj.id}', -1)" ${completionCount === 0 ? 'disabled' : ''}>-</button>
                             </div>
                         ` : ''}

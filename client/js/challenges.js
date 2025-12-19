@@ -87,7 +87,7 @@ function renderChallenges() {
         if(challenge.teamFormat === 'team') {
             // Défi en équipe : vérifier si une équipe de l'utilisateur participe
             isParticipant = challenge.participants.some(
-                p => p.username === currentUser || (p.type === 'team' && p.members.includes(currentUser))
+                p => p.username === currentUser || (p.type === 'team' && p.members.some(user => user.username === currentUser))
             );
             participantType = 'team';
         } else {
@@ -141,7 +141,7 @@ function openJoinModal(challengeId) {
         
         // On récupère les équipes de l'utilisateur qui ne sont pas déjà inscrites au défi
         const userTeams = teams.filter(t =>
-            t.members.includes(currentUser) &&
+            t.members.some(user => user.username === currentUser) &&
             !challenge.participants.some(p => p.type === 'team' && p.teamId === t.id)
         );
 
@@ -184,11 +184,11 @@ function confirmJoin() {
         const teamId = document.getElementById('teamSelect').value;
 
         // On récupère l'équipe parmi toutes les équipes de l'utilisateur
-        const team = teams.find(t => t.id === teamId && t.members.includes(currentUser));
+        const team = teams.find(t => t.id === teamId && t.members.some(user => user.username === currentUser));
         if (!team) return showNotification('Équipe invalide', 'error');
 
         // Vérifier si l'utilisateur est le leader
-        const isLeader = team.isLeader || team.members[0] === currentUser;
+        const isLeader = team.isLeader || team.members[0].username === currentUser;
         if (!isLeader) return showNotification('Seul le leader peut inscrire l’équipe', 'error');
 
         participant = {
@@ -218,7 +218,7 @@ function confirmJoin() {
     // Déduire les points du joueur ou de l'équipe
     if (participant.type === 'team') {
         participant.members.forEach(username => {
-            const user = users.find(u => u.username === username);
+            const user = users.find(u => u.username === username.username);
             if (user) user.totalPoints -= betAmount;
         });
     } else {

@@ -47,8 +47,8 @@ function renderTeams() {
         return;
     }
     
-    myTeams = teams.filter(t => t.members && t.members.includes(currentUser));
-    allTeams = teams.filter(t => !t.members || !t.members.includes(currentUser));
+    myTeams = teams.filter(t => t.members && t.members.some(user => user.username === currentUser));
+    allTeams = teams.filter(t => !t.members || !t.members.some(user => user.username === currentUser));
     
     console.log('Rendu des équipes:', { myTeams, allTeams });
     
@@ -126,7 +126,7 @@ function handleCreateTeam(e) {
         name: name,
         tag: tag,
         leader: currentUser,
-        members: [currentUser],
+        members: [{"username": currentUser, "cheated": false}],
         maxMembers: maxMembers,
         createdAt: Date.now()
     };
@@ -150,7 +150,7 @@ function joinTeam(teamId) {
         return;
     }
     
-    if(team.members.includes(currentUser)) {
+    if(team.members.some(user => user.username === currentUser)) {
         showNotification('Vous êtes déjà dans cette équipe', 'error');
         return;
     }
@@ -162,7 +162,7 @@ function joinTeam(teamId) {
         return;
     }
     
-    team.members.push(currentUser);
+    team.members.push({"username": currentUser, "cheated": false});
     
     if(ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'updateTeams', teams }));
@@ -177,13 +177,13 @@ function leaveTeam(teamId) {
     const team = teams.find(t => t.id === teamId);
     if(!team) return;
     
-    team.members = team.members.filter(m => m !== currentUser);
+    team.members = team.members.filter(m => m.username !== currentUser);
     
     // Si le chef quitte, promouvoir un autre membre ou supprimer l'équipe
     if(team.leader === currentUser) {
         if(team.members.length > 0) {
-            team.leader = team.members[0];
-            showNotification(`${team.members[0]} est maintenant le chef de l'équipe`);
+            team.leader = team.members[0].username;
+            showNotification(`${team.members[0].username} est maintenant le chef de l'équipe`);
         } else {
             teams = teams.filter(t => t.id !== teamId);
             showNotification('L\'équipe a été supprimée');
@@ -214,7 +214,7 @@ function openTeamDetail(teamId) {
     if(!team) return;
     
     const isLeader = team.leader === currentUser;
-    const isMember = team.members.includes(currentUser);
+    const isMember = team.members.some(user => user.username === currentUser);
     
     const content = `
         <h3>${team.name} [${team.tag}]</h3>
@@ -226,15 +226,15 @@ function openTeamDetail(teamId) {
             <h4 style="color: var(--primary); margin-bottom: 0.5rem;">Membres (${team.members.length}/${team.maxMembers})</h4>
             <div class="friends-list">
                 ${team.members.map(member => {
-                    const user = users.find(u => u.username === member);
+                    const user = users.find(u => u.username === member.username);
                     return `
                         <div class="friend-card">
                             <div class="friend-info">
-                                <span class="friend-name">${member}${member === team.leader ? ' 👑' : ''}</span>
+                                <span class="friend-name">${member.username}${member.username === team.leader ? ' 👑' : ''}</span>
                                 ${user ? `<span class="friend-points">💰 ${user.totalPoints} pts</span>` : ''}
                             </div>
-                            ${isLeader && member !== team.leader ? `
-                                <button class="btn btn-danger btn-sm" onclick="kickMember('${teamId}', '${member}')">Expulser</button>
+                            ${isLeader && member.username !== team.leader ? `
+                                <button class="btn btn-danger btn-sm" onclick="kickMember('${teamId}', '${member.username}')">Expulser</button>
                             ` : ''}
                         </div>
                     `;
@@ -257,7 +257,7 @@ function kickMember(teamId, username) {
     const team = teams.find(t => t.id === teamId);
     if(!team || team.leader !== currentUser) return;
     
-    team.members = team.members.filter(m => m !== username);
+    team.members = team.members.filter(m => m.username !== username);
     
     if(ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'updateTeams', teams }));

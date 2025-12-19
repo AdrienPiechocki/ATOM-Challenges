@@ -15,8 +15,7 @@ let bingoSize = 3;
 // --- Sélecteurs équipe ---
 const teamFormatSelect = document.getElementById('teamFormat');
 const teamConfig = document.getElementById('teamConfig');
-const minPlayersInput = document.getElementById('minPlayers');
-const maxPlayersInput = document.getElementById('maxPlayers');
+const playersInput = document.getElementById('players');
 
 // --- Affichage description format + configuration associée ---
 document.getElementById('formatChallenge').addEventListener('change', (e) => {
@@ -319,17 +318,9 @@ document.getElementById('createChallengeForm').addEventListener('submit', (e) =>
 
     // --- Ajouter la config équipe si nécessaire ---
     if(teamFormat === 'team') {
-        const minPlayers = parseInt(minPlayersInput.value);
-        const maxPlayers = parseInt(maxPlayersInput.value);
-
-        if(isNaN(minPlayers) || isNaN(maxPlayers) || minPlayers > maxPlayers) {
-            showNotification('Le nombre minimum de joueurs par équipe doit être inférieur ou égal au maximum', 'error');
-            return;
-        }
-
+        const players = parseInt(playersInput.value);
         newChallenge.teamConfig = {
-            minPlayersPerTeam: minPlayers,
-            maxPlayersPerTeam: maxPlayers
+            playersPerTeam: players
         };
     }
 
