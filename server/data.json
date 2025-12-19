@@ -1,4 +1,28 @@
 {
+  "server": {
+    "title": "⚛️ ATOM Challenges",
+    "subtitle": "Organisez et participez à des défis gaming",
+    "palette": {
+      "primary": "#2563eb",
+      "primary-dark": "#1e40af",
+      "primary-light": "#3b82f6",
+      "secondary": "#8b5cf6",
+      "success": "#10b981",
+      "danger": "#ef4444",
+      "warning": "#f59e0b",
+      "info": "#06b6d4",
+      "dark": "#1e293b",
+      "light": "#f8fafc",
+      "gray": "#64748b",
+      "border": "#e2e8f0",
+      "shadow": "#0000001a",
+      "bg": "#f1f5f9",
+      "card-bg": "#ffffff",
+      "text": "#1e293b",
+      "background-gradient-a": "#667eea",
+      "background-gradient-b": "#764ba2"
+    }
+  },
   "users": [],
   "challenges": [],
   "messages": {},
